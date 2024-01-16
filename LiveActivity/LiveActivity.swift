@@ -19,13 +19,13 @@ struct LiveActivity: Widget {
     @ViewBuilder private func changeLabel(context: ActivityViewContext<LiveActivityAttributes>) -> some View {
         if !context.state.change.isEmpty {
             if context.isStale {
-                Text(context.state.change).foregroundStyle(.primary.opacity(0.5))
-                    .strikethrough(pattern: .solid, color: .red.opacity(0.6))
+                Text(context.state.change).foregroundStyle(.primary.opacity(0.7))
+                    .strikethrough(pattern: .solid, color: .teal.opacity(0.5))
             } else {
                 Text(context.state.change)
             }
         } else {
-            Text("--")
+            Text("_")
         }
     }
 
@@ -33,9 +33,9 @@ struct LiveActivity: Widget {
         let text = Text("Updated: \(dateFormatter.string(from: context.state.date))")
         if context.isStale {
             if #available(iOSApplicationExtension 17.0, *) {
-                return text.bold().foregroundStyle(.red)
+                return text.bold().foregroundStyle(.teal)
             } else {
-                return text.bold().foregroundColor(.red)
+                return text.bold().foregroundColor(.teal)
             }
         } else {
             return text
@@ -51,7 +51,7 @@ struct LiveActivity: Widget {
         // narrow mode is for the minimal dynamic island view
         // there is not enough space to show all three arrow there
         // and everything has to be squeezed together to some degree
-        // only display the first arrow character and make it red in case there were more characters
+        // only display the first arrow character and make it yellow in case there were more characters
         var directionText: String?
         var warnColor: Color?
         if let direction = context.state.direction {
@@ -59,7 +59,7 @@ struct LiveActivity: Widget {
                 directionText = String(direction[direction.startIndex ... direction.startIndex])
 
                 if direction.count > 1 {
-                    warnColor = Color.red
+                    warnColor = Color.yellow
                 }
             } else {
                 directionText = direction
@@ -77,7 +77,7 @@ struct LiveActivity: Widget {
 
         let stack = HStack(spacing: spacing) {
             Text(bgText)
-                .strikethrough(context.isStale, pattern: .solid, color: .red.opacity(0.6))
+                .strikethrough(context.isStale, pattern: .solid, color: .teal.opacity(0.5))
             if let direction = directionText {
                 let text = Text(direction)
                 switch size {
@@ -118,7 +118,7 @@ struct LiveActivity: Widget {
             // Semantic UIColors do NOT (as of iOS 17.1.1). Like UIColor.systemBackgroundColor (it does not adapt to changes of the interface style)
             // The colorScheme environment varaible that is usually used to detect dark mode does NOT work here (it reports false values)
             .foregroundStyle(Color.primary)
-            .background(BackgroundStyle.background.opacity(0.4))
+            .background(BackgroundStyle.background.opacity(0.7))
             .activityBackgroundTint(Color.clear)
         } dynamicIsland: { context in
             DynamicIsland {
