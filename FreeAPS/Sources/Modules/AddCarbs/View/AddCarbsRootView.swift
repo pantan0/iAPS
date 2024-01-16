@@ -82,7 +82,8 @@ extension AddCarbs {
                                 pushed = true
                             } label: { Text("Now") }.buttonStyle(.borderless).foregroundColor(.secondary).padding(.trailing, 5)
                         } else {
-                            Button { state.date = state.date.addingTimeInterval(-15.minutes.timeInterval) }
+                            Button { UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                     state.date = state.date.addingTimeInterval(-15.minutes.timeInterval) }
                             label: { Image(systemName: "minus.circle") }.tint(.blue).buttonStyle(.borderless)
                             DatePicker(
                                 "Time",
@@ -91,6 +92,7 @@ extension AddCarbs {
                             ).controlSize(.mini)
                                 .labelsHidden()
                             Button {
+                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                                 state.date = state.date.addingTimeInterval(15.minutes.timeInterval)
                             }
                             label: { Image(systemName: "plus.circle") }.tint(.blue).buttonStyle(.borderless)
