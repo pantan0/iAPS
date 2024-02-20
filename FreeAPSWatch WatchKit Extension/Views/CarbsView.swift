@@ -83,7 +83,7 @@ struct CarbsView: View {
                     from: 0,
                     through: Double(state.maxCOB ?? 120),
                     by: 1,
-                    sensitivity: .high,
+                    sensitivity: .medium,
                     isContinuous: false,
                     isHapticFeedbackEnabled: true
                 )
@@ -134,7 +134,7 @@ struct CarbsView: View {
                     from: 0,
                     through: Double(240),
                     by: 1,
-                    sensitivity: .high,
+                    sensitivity: .medium,
                     isContinuous: false,
                     isHapticFeedbackEnabled: true
                 )
@@ -183,7 +183,7 @@ struct CarbsView: View {
                     from: 0,
                     through: Double(240),
                     by: 1,
-                    sensitivity: .high ,
+                    sensitivity: .medium ,
                     isContinuous: false,
                     isHapticFeedbackEnabled: true
                 )
