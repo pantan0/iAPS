@@ -20,7 +20,7 @@ struct LiveActivity: Widget {
         if !context.state.change.isEmpty {
             if context.isStale {
                 Text(context.state.change).foregroundStyle(.primary.opacity(0.7))
-                    .strikethrough(pattern: .solid, color: .teal.opacity(0.5))
+                    .strikethrough(pattern: .solid, color: .orange.opacity(0.6))
             } else {
                 Text(context.state.change)
             }
@@ -33,9 +33,9 @@ struct LiveActivity: Widget {
         let text = Text("Updated: \(dateFormatter.string(from: context.state.date))")
         if context.isStale {
             if #available(iOSApplicationExtension 17.0, *) {
-                return text.bold().foregroundStyle(.teal)
+                return text.bold().foregroundStyle(.orange)
             } else {
-                return text.bold().foregroundColor(.teal)
+                return text.bold().foregroundColor(.orange)
             }
         } else {
             return text
@@ -77,7 +77,7 @@ struct LiveActivity: Widget {
 
         let stack = HStack(spacing: spacing) {
             Text(bgText)
-                .strikethrough(context.isStale, pattern: .solid, color: .teal.opacity(0.5))
+                .strikethrough(context.isStale, pattern: .solid, color: .orange.opacity(0.6))
             if let direction = directionText {
                 let text = Text(direction)
                 switch size {
