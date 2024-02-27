@@ -148,8 +148,8 @@ final class BaseCalendarManager: CalendarManager, Injectable {
 
         if displeyCOBandIOB {
             if displayEmojis {
-                iobDisplayText += "💉"
-                cobDisplayText += "🥨"
+                iobDisplayText += "💧"
+                cobDisplayText += "🍕"
             } else {
                 iobDisplayText += "IOB:"
                 cobDisplayText += "COB:"
