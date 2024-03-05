@@ -331,6 +331,8 @@ extension Home {
                         }
                     }
                     .onLongPressGesture {
+                        let impactHeavy = UIImpactFeedbackGenerator(style: .heavy)
+                        impactHeavy.impactOccurred()
                         state.showModal(for: .overrideProfilesConfig)
                     }
                     if state.useTargetButton {
@@ -556,7 +558,11 @@ extension Home {
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(.white, .blue)
                         .font(.bolusProgressStopFont)
-                        .onTapGesture { state.cancelBolus() }
+                        .onTapGesture {
+                            let cancelFeedback = UINotificationFeedbackGenerator()
+                            cancelFeedback.notificationOccurred(.success)
+                            state.cancelBolus()
+                        }
                         .offset(x: 10, y: 0)
                 }
             }
