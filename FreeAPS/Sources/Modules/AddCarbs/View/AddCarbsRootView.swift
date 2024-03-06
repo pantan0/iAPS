@@ -119,7 +119,11 @@ extension AddCarbs {
                 }
 
                 Section {
-                    Button { state.add(override, fetch: editMode) }
+                    Button {
+                        let successFeedback = UINotificationFeedbackGenerator()
+                        successFeedback.notificationOccurred(.success)
+                        state.add(override, fetch: editMode)
+                    }
                     label: { Text(((state.skipBolus && !override && !editMode) || state.carbs <= 0) ? "Save" : "Continue") }
                         .disabled(empty)
                         .frame(maxWidth: .infinity, alignment: .center)
