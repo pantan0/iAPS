@@ -533,8 +533,8 @@ extension Home {
                         .foregroundStyle(.white, .blue)
                         .font(.bolusProgressStopFont)
                         .onTapGesture {
-                            let impactSoft = UIImpactFeedbackGenerator(style: .soft)
-                            impactSoft.impactOccurred()
+                            let successFeedback = UINotificationFeedbackGenerator()
+                            successFeedback.notificationOccurred(.success)
                             state.cancelBolus()
                         }
                         .offset(x: 10, y: 0)
