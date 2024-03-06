@@ -120,8 +120,8 @@ extension AddCarbs {
 
                 Section {
                     Button {
-                        let successFeedback = UINotificationFeedbackGenerator()
-                        successFeedback.notificationOccurred(.success)
+                        let impactSoft = UIImpactFeedbackGenerator(style: .soft)
+                        impactSoft.impactOccurred()
                         state.add(override, fetch: editMode)
                     }
                     label: { Text(((state.skipBolus && !override && !editMode) || state.carbs <= 0) ? "Save" : "Continue") }
