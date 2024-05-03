@@ -12,6 +12,7 @@ extension AddCarbs {
         @State var isPromptPresented = false
         @State var saved = false
         @State var pushed = false
+        @State var button = false
         @State private var showAlert = false
         @FocusState private var isFocused: Bool
 
@@ -120,9 +121,8 @@ extension AddCarbs {
 
                 Section {
                     Button {
-                        let impactSoft = UIImpactFeedbackGenerator(style: .soft)
-                        impactSoft.impactOccurred()
-                        state.add(override, fetch: editMode)
+                        button.toggle()
+                        if button { state.add(override, fetch: editMode) }
                     }
                     label: { Text(((state.skipBolus && !override && !editMode) || state.carbs <= 0) ? "Save" : "Continue") }
                         .disabled(empty)
