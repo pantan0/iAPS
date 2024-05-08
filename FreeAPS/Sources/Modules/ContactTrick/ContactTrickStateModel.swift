@@ -8,7 +8,6 @@ enum ContactTrickValue: String, JSON, CaseIterable, Identifiable, Codable {
     case eventualBG
     case delta
     case trend
-    case glucoseDate
     case lastLoopDate
     case cob
     case iob
@@ -26,8 +25,6 @@ enum ContactTrickValue: String, JSON, CaseIterable, Identifiable, Codable {
             return NSLocalizedString("Delta", comment: "")
         case .trend:
             return NSLocalizedString("Trend", comment: "")
-        case .glucoseDate:
-            return NSLocalizedString("Glucose date", comment: "")
         case .lastLoopDate:
             return NSLocalizedString("Last loop date", comment: "")
         case .cob:
@@ -35,7 +32,7 @@ enum ContactTrickValue: String, JSON, CaseIterable, Identifiable, Codable {
         case .iob:
             return NSLocalizedString("IOB", comment: "")
         case .ring:
-            return NSLocalizedString("Ring", comment: "")
+            return NSLocalizedString("Loop status", comment: "")
         }
     }
 }
@@ -81,8 +78,9 @@ enum ContactTrickLargeRing: String, JSON, CaseIterable, Identifiable, Codable {
 
 extension ContactTrick {
     final class StateModel: BaseStateModel<Provider> {
-        @Published var syncInProgress = false
-        @Published var items: [Item] = []
+        @Published private(set) var syncInProgress = false
+        @Published private(set) var items: [Item] = []
+        @Published private(set) var changed: Bool = false
 
         override func subscribe() {
             items = provider.contacts.enumerated().map { index, contact in
@@ -91,24 +89,27 @@ extension ContactTrick {
                     entry: contact
                 )
             }
+            changed = false
         }
 
         func add() {
             let newItem = Item(
                 index: items.count,
-                entry: ContactTrickEntry(
-                    enabled: false,
-                    layout: .single,
-                    contactId: nil,
-                    displayName: nil,
-                    darkMode: true,
-                    fontSize: 100,
-                    fontName: "Default Font",
-                    fontWeight: .medium
-                )
+                entry: ContactTrickEntry()
             )
 
             items.append(newItem)
+            changed = true
+        }
+
+        func update(_ atIndex: Int, _ value: ContactTrickEntry) {
+            items[atIndex].entry = value
+            changed = true
+        }
+
+        func remove(atOffsets: IndexSet) {
+            items.remove(atOffsets: atOffsets)
+            changed = true
         }
 
         func save() {
@@ -119,9 +120,13 @@ extension ContactTrick {
             provider.saveContacts(contacts)
                 .receive(on: DispatchQueue.main)
                 .sink { _ in
-                    print("saved!")
                     self.syncInProgress = false
-                } receiveValue: {}
+                    self.changed = false
+                } receiveValue: { contacts in
+                    contacts.enumerated().forEach { index, item in
+                        self.items[index].entry = item
+                    }
+                }
                 .store(in: &lifetime)
         }
     }

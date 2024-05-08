@@ -5,7 +5,7 @@ import Foundation
 import Swinject
 
 protocol ContactTrickManager {
-    func updateContacts(contacts: [ContactTrickEntry], completion: @escaping (Result<Void, Error>) -> Void)
+    func updateContacts(contacts: [ContactTrickEntry], completion: @escaping (Result<[ContactTrickEntry], Error>) -> Void)
 }
 
 final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
@@ -17,33 +17,46 @@ final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
     @Injected() private var settingsManager: SettingsManager!
     @Injected() private var storage: FileStorage!
 
+    private var knownIds: [String] = []
     private var contacts: [ContactTrickEntry] = []
 
-    let coreDataStorage = CoreDataStorage()
+    private let coreDataStorage = CoreDataStorage()
 
     init(resolver: Resolver) {
         super.init()
         injectServices(resolver)
 
-        broadcaster.register(GlucoseObserver.self, observer: self)
         broadcaster.register(SuggestionObserver.self, observer: self)
         broadcaster.register(SettingsObserver.self, observer: self)
 
         contacts = storage.retrieve(OpenAPS.Settings.contactTrick, as: [ContactTrickEntry].self)
             ?? [ContactTrickEntry](from: OpenAPS.defaults(for: OpenAPS.Settings.contactTrick))
             ?? []
-        
+
+        knownIds = contacts.compactMap(\.contactId)
+
         processQueue.async {
             self.renderContacts()
         }
     }
 
-    func updateContacts(contacts: [ContactTrickEntry], completion: @escaping (Result<Void, Error>) -> Void) {
+    func updateContacts(contacts: [ContactTrickEntry], completion: @escaping (Result<[ContactTrickEntry], Error>) -> Void) {
         self.contacts = contacts
-        
+        let newIds = contacts.compactMap(\.contactId)
+
+        let knownSet = Set(knownIds)
+        let newSet = Set(newIds)
+        let removedIds = knownSet.subtracting(newSet)
+
         processQueue.async {
+            removedIds.forEach { contactId in
+                if !self.deleteContact(contactId) {
+                    print("contacts cleanup, failed to delete contact \(contactId)")
+                }
+            }
             self.renderContacts()
-            completion(.success(()))
+            self.knownIds = self.contacts.compactMap(\.contactId)
+            completion(.success(self.contacts))
         }
     }
 
@@ -61,77 +74,171 @@ final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
             glucose: glucoseValues.glucose,
             trend: glucoseValues.trend,
             delta: glucoseValues.delta,
-            glucoseDate: readings.first?.date ?? .distantPast,
             lastLoopDate: suggestion?.timestamp,
             iob: suggestion?.iob,
+            iobText: suggestion?.iob.map { iob in
+                iobFormatter.string(from: iob as NSNumber)!
+            },
             cob: suggestion?.cob,
+            cobText: suggestion?.cob.map { cob in
+                cobFormatter.string(from: cob as NSNumber)!
+            },
             eventualBG: eventualBGString(suggestion),
             maxIOB: settingsManager.preferences.maxIOB,
             maxCOB: settingsManager.preferences.maxCOB
         )
 
-        contacts.forEach { renderContact($0, state) }
+        contacts = contacts.enumerated().map { index, entry in renderContact(entry, index + 1, state) }
+
+        storage.save(contacts, as: OpenAPS.Settings.contactTrick)
 
         workItem = DispatchWorkItem(block: {
-            print("in updateContact, no updates received for more than 5 minutes")
+            print("in renderContacts, no updates received for more than 5 minutes")
             self.renderContacts()
         })
         DispatchQueue.main.asyncAfter(deadline: .now() + 5 * 60 + 15, execute: workItem!)
     }
 
-    private func renderContact(_ entry: ContactTrickEntry, _ state: ContactTrickState) {
-        guard let contactId = entry.contactId, entry.enabled else {
-            return
+    private let keysToFetch = [
+        CNContactImageDataKey,
+        CNContactGivenNameKey,
+        CNContactOrganizationNameKey
+    ] as [CNKeyDescriptor]
+
+    private func renderContact(_ _entry: ContactTrickEntry, _ index: Int, _ state: ContactTrickState) -> ContactTrickEntry {
+        var entry = _entry
+        let mutableContact: CNMutableContact
+        let saveRequest = CNSaveRequest()
+
+        if let contactId = entry.contactId {
+            do {
+                let contact = try contactStore.unifiedContact(withIdentifier: contactId, keysToFetch: keysToFetch)
+
+                mutableContact = contact.mutableCopy() as! CNMutableContact
+                updateContactFields(entry: entry, index: index, state: state, mutableContact: mutableContact)
+                saveRequest.update(mutableContact)
+            } catch let error as NSError {
+                if error.code == 200 { // 200: Updated Record Does Not Exist
+                    print("in handleEnabledContact, failed to fetch the contact, code 200, contact does not exist")
+                    mutableContact = createNewContact(
+                        entry: entry,
+                        index: index,
+                        state: state,
+                        saveRequest: saveRequest
+                    )
+                } else {
+                    print("in handleEnabledContact, failed to fetch the contact - \(getContactsErrorDetails(error))")
+                    return entry
+                }
+            } catch {
+                print("in handleEnabledContact, failed to fetch the contact: \(error.localizedDescription)")
+                return entry
+            }
+
+        } else {
+            print("no contact \(index) - creating")
+            mutableContact = createNewContact(
+                entry: entry,
+                index: index,
+                state: state,
+                saveRequest: saveRequest
+            )
         }
 
-        let keysToFetch = [CNContactImageDataKey] as [CNKeyDescriptor]
+        saveUpdatedContact(saveRequest)
 
-        let contact: CNContact
-        do {
-            contact = try contactStore.unifiedContact(withIdentifier: contactId, keysToFetch: keysToFetch)
-        } catch {
-            print("in updateContact, an error has been thrown while fetching the selected contact")
-            return
-        }
+        entry.contactId = mutableContact.identifier
 
-        guard let mutableContact = contact.mutableCopy() as? CNMutableContact else {
-            return
-        }
+        return entry
+    }
+
+    private func createNewContact(
+        entry: ContactTrickEntry,
+        index: Int,
+        state: ContactTrickState,
+        saveRequest: CNSaveRequest
+    ) -> CNMutableContact {
+        let mutableContact = CNMutableContact()
+        updateContactFields(
+            entry: entry, index: index, state: state, mutableContact: mutableContact
+        )
+        print("creating a new contact, \(mutableContact.identifier)")
+        saveRequest.add(mutableContact, toContainerWithIdentifier: nil)
+        return mutableContact
+    }
+
+    private func updateContactFields(
+        entry: ContactTrickEntry,
+        index: Int,
+        state: ContactTrickState,
+        mutableContact: CNMutableContact
+    ) {
+        mutableContact.givenName = "iAPS \(index)"
+        mutableContact
+            .organizationName =
+            "Created and managed by iAPS - \(Date().formatted(date: .abbreviated, time: .shortened))"
 
         mutableContact.imageData = ContactPicture.getImage(
             contact: entry,
             state: state
         ).pngData()
-
-        saveUpdatedContact(mutableContact)
     }
 
-    private func saveUpdatedContact(_ mutableContact: CNMutableContact) {
-        let saveRequest = CNSaveRequest()
-        saveRequest.update(mutableContact)
+    private func deleteContact(_ contactId: String) -> Bool {
+        do {
+            print("deleting contact \(contactId)")
+            let keysToFetch = [CNContactIdentifierKey as CNKeyDescriptor] // we don't really need any, so just ID
+            let contact = try contactStore.unifiedContact(withIdentifier: contactId, keysToFetch: keysToFetch)
+
+            guard let mutableContact = contact.mutableCopy() as? CNMutableContact else {
+                print("in deleteContact, failed to get a mutable copy of the contact")
+                return false
+            }
+
+            let saveRequest = CNSaveRequest()
+            saveRequest.delete(mutableContact)
+            try contactStore.execute(saveRequest)
+            return true
+        } catch let error as NSError {
+            if error.code == 200 { // Updated Record Does Not Exist
+                return true
+            } else {
+                print("in deleteContact, failed to update the contact - \(getContactsErrorDetails(error))")
+                return false
+            }
+        } catch {
+            print("in deleteContact, failed to update the contact: \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    private func saveUpdatedContact(_ saveRequest: CNSaveRequest) {
         do {
             try contactStore.execute(saveRequest)
         } catch let error as NSError {
-            var details: String?
-            if error.domain == CNErrorDomain {
-                switch error.code {
-                case CNError.authorizationDenied.rawValue:
-                    details = "Authorization denied"
-                case CNError.communicationError.rawValue:
-                    details = "Communication error"
-                case CNError.insertedRecordAlreadyExists.rawValue:
-                    details = "Record already exists"
-                case CNError.dataAccessError.rawValue:
-                    details = "Data access error"
-                default:
-                    details = "Code \(error.code)"
-                }
-            }
-            print("in updateContact, failed to update the contact - \(details ?? "no details"): \(error.localizedDescription)")
-
+            print("in updateContact, failed to update the contact - \(getContactsErrorDetails(error))")
         } catch {
             print("in updateContact, failed to update the contact: \(error.localizedDescription)")
         }
+    }
+
+    private func getContactsErrorDetails(_ error: NSError) -> String {
+        var details: String?
+        if error.domain == CNErrorDomain {
+            switch error.code {
+            case CNError.authorizationDenied.rawValue:
+                details = "Authorization denied"
+            case CNError.communicationError.rawValue:
+                details = "Communication error"
+            case CNError.insertedRecordAlreadyExists.rawValue:
+                details = "Record already exists"
+            case CNError.dataAccessError.rawValue:
+                details = "Data access error"
+            default:
+                details = "Code \(error.code)"
+            }
+        }
+        return "\(details ?? "no details"): \(error.localizedDescription)"
     }
 
     private func glucoseText(_ glucose: [Readings]) -> (glucose: String, trend: String, delta: String) {
@@ -164,7 +271,7 @@ final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
             return nil
         }
         let units = settingsManager.settings.units
-        return eventualFormatter.string(
+        return glucoseFormatter.string(
             from: (units == .mmolL ? eventualBG.asMmolL : Decimal(eventualBG)) as NSNumber
         )!
     }
@@ -172,7 +279,6 @@ final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
     private var glucoseFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: "en_US")
         formatter.maximumFractionDigits = 0
         if settingsManager.settings.units == .mmolL {
             formatter.minimumFractionDigits = 1
@@ -182,10 +288,20 @@ final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
         return formatter
     }
 
-    private var eventualFormatter: NumberFormatter {
+    private var iobFormatter: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 1
+        formatter.maximumFractionDigits = 1
+        formatter.roundingMode = .halfUp
+        return formatter
+    }
+
+    private var cobFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        formatter.roundingMode = .halfUp
         return formatter
     }
 
@@ -199,14 +315,9 @@ final class BaseContactTrickManager: NSObject, ContactTrickManager, Injectable {
 }
 
 extension BaseContactTrickManager:
-    GlucoseObserver,
     SuggestionObserver,
     SettingsObserver
 {
-    func glucoseDidUpdate(_: [BloodGlucose]) {
-        renderContacts()
-    }
-
     func suggestionDidUpdate(_: Suggestion) {
         renderContacts()
     }
