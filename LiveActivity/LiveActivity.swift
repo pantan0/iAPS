@@ -157,7 +157,7 @@ struct LiveActivity: Widget {
                 }
             }
             .widgetURL(URL(string: "freeaps-x://"))
-            .keylineTint(Color.purple)
+            .keylineTint(Color.mint)
             .contentMargins(.horizontal, 0, for: .minimal)
             .contentMargins(.trailing, 0, for: .compactLeading)
             .contentMargins(.leading, 0, for: .compactTrailing)
