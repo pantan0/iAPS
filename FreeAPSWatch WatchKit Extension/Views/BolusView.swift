@@ -36,7 +36,7 @@ struct BolusView: View {
                             from: 0,
                             through: Double((state.maxBolus ?? 5) / (state.bolusIncrement ?? 0.1)),
                             by: 1,
-                            sensitivity: .high,
+                            sensitivity: .medium,
                             isContinuous: false,
                             isHapticFeedbackEnabled: true
                         )
