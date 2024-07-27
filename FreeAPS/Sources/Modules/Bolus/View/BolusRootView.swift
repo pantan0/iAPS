@@ -84,6 +84,8 @@ extension Bolus {
                 Section {
                     if state.amount > 0 {
                         Button {
+                            let impactLight = UIImpactFeedbackGenerator(style: .light)
+                            impactLight.impactOccurred()
                             state.add()
                             keepForNextWiew = true
                         }
