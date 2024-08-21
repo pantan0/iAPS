@@ -103,7 +103,7 @@ struct LiveActivity: Widget {
     private func iob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
         HStack(spacing: 0) {
             Text(context.state.iob)
-            Text(" U")
+            Text(" u")
         }
         .foregroundStyle(.insulin)
     }
@@ -111,7 +111,7 @@ struct LiveActivity: Widget {
     private func cob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
         HStack(spacing: 0) {
             Text(context.state.cob)
-            Text(" g")
+            Text("g")
         }
         .foregroundStyle(.loopYellow)
     }
@@ -167,7 +167,7 @@ struct LiveActivity: Widget {
                         "mg/dL",
                         comment: "The short unit display string for milligrams of glucose per decilter"
                     )).foregroundStyle(.secondary)
-                }.padding(.top, 10)
+                }.padding(.top, 10).padding(.trailing, 39)
             }
             .privacySensitive()
             .padding(.vertical, 10).padding(.horizontal, 15)
