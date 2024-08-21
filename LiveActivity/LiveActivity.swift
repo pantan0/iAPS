@@ -12,7 +12,7 @@ struct LiveActivity: Widget {
     private let dateFormatter: DateFormatter = {
         var formatter = DateFormatter()
         formatter.dateStyle = .none
-        formatter.timeStyle = .short
+        formatter.dateFormat = "h:mm"
         return formatter
     }()
 
@@ -103,9 +103,9 @@ struct LiveActivity: Widget {
     private func iob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
         HStack(spacing: 0) {
             Text(context.state.iob)
-            Text(" U")
+            Text(" u")
         }
-        .foregroundStyle(.insulin)
+        .foregroundStyle(.cyan)
     }
 
     private func cob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
@@ -118,7 +118,7 @@ struct LiveActivity: Widget {
 
     private func loop(context: ActivityViewContext<LiveActivityAttributes>, size: CGFloat) -> some View {
         let timeAgo = abs(context.state.loopDate.timeIntervalSinceNow) / 60
-        let color: Color = timeAgo > 8 ? .loopYellow : timeAgo > 12 ? .loopRed : .loopGreen
+        let color: Color = timeAgo > 8 ? .loopYellow : timeAgo > 12 ? .loopRed : .green
         return LoopActivity(stroke: color, compact: size == 12).frame(width: size)
     }
 
@@ -130,13 +130,19 @@ struct LiveActivity: Widget {
         ActivityConfiguration(for: LiveActivityAttributes.self) { context in
             // Lock screen/banner UI goes here
             VStack(spacing: 2) {
-                ZStack {
-                    updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
-                        .frame(maxWidth: .infinity, alignment: .center)
+                HStack {
+                    Spacer()
+                        .frame(width: 16)
+                    ZStack {
+                        updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
                 HStack {
+                    Spacer()
+                        .frame(width: 15)
                     VStack {
-                        loop(context: context, size: 22)
+                        loop(context: context, size: 32)
                         emptyText
                     }.offset(x: 0, y: 2)
                     Spacer()
