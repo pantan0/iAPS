@@ -103,7 +103,7 @@ struct LiveActivity: Widget {
     private func iob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
         HStack(spacing: 0) {
             Text(context.state.iob)
-            Text(" u")
+            Text(" U")
         }
         .foregroundStyle(.insulin)
     }
@@ -132,7 +132,7 @@ struct LiveActivity: Widget {
             VStack(spacing: 2) {
                 ZStack {
                     updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .frame(maxWidth: .infinity, alignment: .center)
                 }
                 HStack {
                     VStack {
@@ -167,7 +167,7 @@ struct LiveActivity: Widget {
                         "mg/dL",
                         comment: "The short unit display string for milligrams of glucose per decilter"
                     )).foregroundStyle(.secondary)
-                }.padding(.top, 10).padding(.trailing, 39)
+                }.padding(.top, 10).padding(.trailing, 37)
             }
             .privacySensitive()
             .padding(.vertical, 10).padding(.horizontal, 15)
