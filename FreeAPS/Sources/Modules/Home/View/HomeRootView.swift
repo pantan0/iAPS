@@ -14,7 +14,6 @@ extension Home {
         @State var showCancelAlert = false
         @State var showCancelTTAlert = false
         @State var triggerUpdate = false
-        @State var scrollOffset = CGFloat.zero
         @State var display = false
         @State var displayGlucose = false
         let buttonFont = Font.custom("TimeButtonFont", size: 14)
@@ -92,7 +91,6 @@ extension Home {
         var glucoseView: some View {
             CurrentGlucoseView(
                 recentGlucose: $state.recentGlucose,
-                timerDate: $state.timerDate,
                 delta: $state.glucoseDelta,
                 units: $state.units,
                 alarm: $state.alarm,
@@ -133,6 +131,7 @@ extension Home {
                     state.setupPump = true
                 }
             }
+            .offset(y: 1)
         }
 
         var loopView: some View {
@@ -152,6 +151,7 @@ extension Home {
                 impactHeavy.impactOccurred()
                 state.runLoop()
             }
+            .offset(x: 28, y: -2)
         }
 
         var tempBasalString: String? {
@@ -456,6 +456,7 @@ extension Home {
                     }
                 }
             }
+            .offset(y: 5)
         }
 
         var preview: some View {
@@ -594,14 +595,13 @@ extension Home {
                     VStack {
                         ZStack {
                             glucoseView.frame(maxHeight: .infinity, alignment: .center).offset(y: -5)
-                            loopView.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding(20)
+                            loopView.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading).padding(.leading, 10)
                             HStack {
                                 carbsAndInsulinView
                                     .frame(maxHeight: .infinity, alignment: .bottom)
                                 Spacer()
                                 pumpView
                                     .frame(maxHeight: .infinity, alignment: .bottom)
-                                    .padding(.bottom, 2)
                             }
                             .dynamicTypeSize(...DynamicTypeSize.xLarge)
                             .padding(.horizontal, 10)
