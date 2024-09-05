@@ -12,7 +12,7 @@ struct LiveActivity: Widget {
     private let dateFormatter: DateFormatter = {
         var formatter = DateFormatter()
         formatter.dateStyle = .none
-        formatter.timeStyle = .short
+        formatter.dateFormat = "h:mm"
         return formatter
     }()
 
@@ -105,7 +105,7 @@ struct LiveActivity: Widget {
             Text(context.state.iob)
             Text(" u")
         }
-        .foregroundStyle(.insulin)
+        .foregroundStyle(.cyan)
     }
 
     private func cob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
@@ -118,7 +118,7 @@ struct LiveActivity: Widget {
 
     private func loop(context: ActivityViewContext<LiveActivityAttributes>, size: CGFloat) -> some View {
         let timeAgo = abs(context.state.loopDate.timeIntervalSinceNow) / 60
-        let color: Color = timeAgo > 8 ? .loopYellow : timeAgo > 12 ? .loopRed : .loopGreen
+        let color: Color = timeAgo > 8 ? .loopYellow : timeAgo > 12 ? .loopRed : .green
         return LoopActivity(stroke: color, compact: size == 12).frame(width: size)
     }
 
@@ -130,13 +130,19 @@ struct LiveActivity: Widget {
         ActivityConfiguration(for: LiveActivityAttributes.self) { context in
             // Lock screen/banner UI goes here
             VStack(spacing: 2) {
-                ZStack {
-                    updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                HStack {
+                    Spacer()
+                        .frame(width: 16)
+                    ZStack {
+                        updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
                 HStack {
+                    Spacer()
+                        .frame(width: 15)
                     VStack {
-                        loop(context: context, size: 22)
+                        loop(context: context, size: 32)
                         emptyText
                     }.offset(x: 0, y: 2)
                     Spacer()
@@ -167,7 +173,7 @@ struct LiveActivity: Widget {
                         "mg/dL",
                         comment: "The short unit display string for milligrams of glucose per decilter"
                     )).foregroundStyle(.secondary)
-                }.padding(.top, 10).padding(.trailing, 39)
+                }.padding(.top, 10).padding(.trailing, 37)
             }
             .privacySensitive()
             .padding(.vertical, 10).padding(.horizontal, 15)
@@ -182,33 +188,31 @@ struct LiveActivity: Widget {
                 // Expanded UI goes here.  Compose the expanded UI through
                 // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    bgAndTrend(context: context, size: .expanded).0.font(.title2).padding(.leading, 5)
+                    HStack {
+                        loop(context: context, size: 23)
+                    }.padding(10)
                 }
 
                 DynamicIslandExpandedRegion(.center) {
-                    HStack {
-                        iob(context: context, size: .expanded).font(.title2).padding(.leading, 5)
-                        cob(context: context, size: .expanded).font(.title2).padding(.horizontal, 10)
+                    VStack(spacing: 0) {
+                        HStack {
+                            iob(context: context, size: .expanded).font(.title2).padding(.leading, 10)
+                            Spacer()
+                            cob(context: context, size: .expanded).font(.title2).padding(10)
+                        }
+                        HStack {
+                            bgAndTrend(context: context, size: .expanded).0.font(.title2).padding(.leading, 10)
+                            Spacer()
+                            changeLabel(context: context).font(.title2).padding(10)
+                        }
                     }
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
-                    loop(context: context, size: 23)
+                    updatedLabel(context: context).font(.caption).foregroundStyle(Color.secondary)
+                        .padding(.trailing, 10)
                 }
-                DynamicIslandExpandedRegion(.bottom) {
-                    Group {
-                        ZStack {
-                            changeLabel(context: context).font(.title2).padding(.trailing, 5)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            updatedLabel(context: context).font(.caption).foregroundStyle(Color.secondary)
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                        }
-                    }
-                    .frame(
-                        maxHeight: .infinity,
-                        alignment: .bottom
-                    )
-                }
+                DynamicIslandExpandedRegion(.bottom) {}
             } compactLeading: {
                 HStack {
                     loop(context: context, size: 12)
@@ -230,7 +234,7 @@ struct LiveActivity: Widget {
                 }
             }
             .widgetURL(URL(string: "freeaps-x://"))
-            .keylineTint(Color.mint)
+            .keylineTint(Color.purple)
             .contentMargins(.horizontal, 0, for: .minimal)
             .contentMargins(.trailing, 0, for: .compactLeading)
             .contentMargins(.leading, 0, for: .compactTrailing)

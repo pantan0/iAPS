@@ -83,7 +83,7 @@ extension Settings {
                     Text("Sharing").navigationLink(to: .sharing, from: self)
                     Text("Contact Image").navigationLink(to: .contactTrick, from: self)
                 } header: { Text("Extra Features") }
-                
+
                 Section {
                     Toggle("Debug options", isOn: $state.debugOptions)
                     if state.debugOptions {
