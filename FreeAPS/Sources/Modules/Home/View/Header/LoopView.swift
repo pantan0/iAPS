@@ -29,9 +29,9 @@ struct LoopView: View {
             let multiplyForLargeFonts = fontSize > .extraLarge ? 1.1 : 1
 
             HStack(spacing: 0) {
-                Text("i").font(.system(size: 10, design: .rounded)).offset(y: 0.35)
-                Text("APS").font(.system(size: 12, design: .rounded))
-            }.foregroundStyle(.purple.opacity(0.9))
+                Text("i").font(.system(size: 12, design: .rounded)).offset(y: 0.35)
+                Text("APS").font(.system(size: 13, design: .rounded))
+            }.foregroundStyle(.mint.opacity(0.9))
 
             LoopEllipse(stroke: color)
                 .frame(width: minutesAgo > 9 ? 60 * multiplyForLargeFonts : 60 * multiplyForLargeFonts, height: 27)

@@ -165,7 +165,7 @@ struct LiveActivity: Widget {
                     Spacer()
                     Text(NSLocalizedString("Eventual Glucose", comment: ""))
                     Spacer()
-                    Text(context.state.eventual)
+                    Text(context.state.eventual).font(.title2).foregroundStyle(.purple)
                     Text(context.state.mmol ? NSLocalizedString(
                         "mmol/L",
                         comment: "The short unit display string for millimoles of glucose per liter"
