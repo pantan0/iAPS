@@ -839,7 +839,6 @@ extension Home {
 
                 configureView()
             }
-            // .onAppear(perform: configureView)
             .navigationTitle("Home")
             .navigationBarHidden(true)
             .ignoresSafeArea(.keyboard)
@@ -862,7 +861,6 @@ extension Home {
                             }
                     )
             }
-            .onAppear(perform: configureView)
         }
 
         private var popup: some View {
