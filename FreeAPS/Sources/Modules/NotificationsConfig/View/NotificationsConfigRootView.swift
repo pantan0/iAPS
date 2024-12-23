@@ -94,9 +94,7 @@ extension NotificationsConfig {
                                 Toggle("Show Live Activity", isOn: $state.useLiveActivity)
                                 if state.useLiveActivity {
                                     Toggle("Display Chart", isOn: $state.liveActivityChart)
-                                    if !state.liveActivityChart {
-                                        Toggle("Arrow for Eventual Glucose", isOn: $state.liveActivityEventualArrow)
-                                    }
+                                    Toggle("Arrow for Eventual Glucose", isOn: $state.liveActivityEventualArrow)
                                 }
                             }
                         }
@@ -113,6 +111,16 @@ extension NotificationsConfig {
                                 Toggle("Show Predictions", isOn: $state.liveActivityChartShowPredictions)
                                 Toggle("Threshold Lines", isOn: $state.liveActivityChartThresholdLines)
                                 Toggle("Dynamic range", isOn: $state.liveActivityChartDynamicRange)
+
+                                Picker("Layout", selection: $state.liveActivityChartLayout) {
+                                    ForEach(ActivityChartLayout.allCases) { layout in
+                                        Text(layout.displayName).tag(layout)
+                                    }
+                                }
+
+                                if state.liveActivityChartLayout != .EventualOnTheRightWithTime {
+                                    Toggle("Small Status Circle", isOn: $state.liveActivitySmallStatus)
+                                }
                             }
                         )
                     }

@@ -44,10 +44,12 @@ extension LiveActivityAttributes.ContentState {
         readings: [Readings]?,
         predictions: Predictions?,
         showChart: Bool,
+        chartLayout: ActivityChartLayout,
         chartLowThreshold: Int?,
         chartHighThreshold: Int?,
         chartMaxValue: Int?,
-        eventualText: Bool
+        eventualText: Bool,
+        smallStatus: Bool
     ) {
         guard let glucose = bg?.glucose else {
             return nil
@@ -66,10 +68,10 @@ extension LiveActivityAttributes.ContentState {
             func createPoints(from values: [Int]?) -> LiveActivityAttributes.ValueSeries? {
                 let prefixToTake = 24
                 if let values = values {
-                    let dates = values.indices.prefix(prefixToTake).map {
-                        bgDate.addingTimeInterval(TimeInterval(($0 + 1) * 5 * 60))
+                    let dates = values.dropFirst().indices.prefix(prefixToTake).map {
+                        bgDate.addingTimeInterval(TimeInterval($0 * 5 * 60))
                     }
-                    let clampedValues = values.prefix(prefixToTake).map { Int16(clamping: $0) }
+                    let clampedValues = values.dropFirst().prefix(prefixToTake).map { Int16(clamping: $0) }
                     return LiveActivityAttributes.ValueSeries(dates: dates, values: clampedValues)
                 } else {
                     return nil
@@ -113,11 +115,30 @@ extension LiveActivityAttributes.ContentState {
             readings: preparedReadings,
             predictions: activityPredictions,
             showChart: showChart,
+            chartLayout: chartLayout.toLiveActivityAttributes,
             chartLowThreshold: chartLowThreshold.map({ Int16(clamping: $0) }),
             chartHighThreshold: chartHighThreshold.map({ Int16(clamping: $0) }),
             chartMaxValue: chartMaxValue.map({ Int16(clamping: $0) }),
-            eventualText: eventualText
+            eventualText: eventualText,
+            smallStatus: smallStatus
         )
+    }
+}
+
+extension ActivityChartLayout {
+    var toLiveActivityAttributes: LiveActivityAttributes.ActivityChartLayout {
+        switch self {
+        case .EventualAtTheTop:
+            return .EventualAtTheTop
+        case .EventualAtTheBottom:
+            return .EventualAtTheBottom
+        case .EventualOnTheRight:
+            return .EventualOnTheRight
+        case .EventualOnTheRightWithTime:
+            return .EventualOnTheRightWithTime
+        case .NoEventual:
+            return .NoEventual
+        }
     }
 }
 
@@ -198,7 +219,8 @@ extension LiveActivityAttributes.ContentState {
                 newSettings.liveActivityChartShowPredictions != knownSettings.liveActivityChartShowPredictions ||
                 newSettings.liveActivityChartThresholdLines != knownSettings.liveActivityChartThresholdLines ||
                 newSettings.liveActivityChartDynamicRange != knownSettings.liveActivityChartDynamicRange ||
-                newSettings.liveActivityEventualArrow != knownSettings.liveActivityEventualArrow
+                newSettings.liveActivityEventualArrow != knownSettings.liveActivityEventualArrow ||
+                newSettings.liveActivitySmallStatus != knownSettings.liveActivitySmallStatus
             {
                 print("live activity settings changed")
                 forceActivityUpdate(force: true)
@@ -329,12 +351,14 @@ extension LiveActivityAttributes.ContentState {
                         readings: nil,
                         predictions: nil,
                         showChart: settings.liveActivityChart,
+                        chartLayout: settings.liveActivityChartLayout.toLiveActivityAttributes,
                         chartLowThreshold: settings
                             .liveActivityChartThresholdLines ? Int16(clamping: (settings.low as NSDecimalNumber).intValue) : nil,
                         chartHighThreshold: settings
                             .liveActivityChartThresholdLines ? Int16(clamping: (settings.high as NSDecimalNumber).intValue) : nil,
                         chartMaxValue: settings.liveActivityChartDynamicRange ? nil : 300, // mg/dl
-                        eventualText: !settings.liveActivityEventualArrow
+                        eventualText: !settings.liveActivityEventualArrow,
+                        smallStatus: settings.liveActivitySmallStatus
                     ),
                     staleDate: Date.now.addingTimeInterval(60)
                 )
@@ -400,10 +424,12 @@ extension LiveActivityBridge: SuggestionObserver, EnactedSuggestionObserver {
             predictions: settings.liveActivityChartShowPredictions && settings.liveActivityChartShowPredictions ? suggestion
                 .predictions : nil,
             showChart: settings.liveActivityChart,
+            chartLayout: settings.liveActivityChartLayout,
             chartLowThreshold: settings.liveActivityChartThresholdLines ? Int(settings.low) : nil,
             chartHighThreshold: settings.liveActivityChartThresholdLines ? Int(settings.high) : nil,
             chartMaxValue: settings.liveActivityChartDynamicRange ? nil : 300, // mg/dl
-            eventualText: !settings.liveActivityEventualArrow
+            eventualText: !settings.liveActivityEventualArrow,
+            smallStatus: settings.liveActivitySmallStatus
         ) else {
             return
         }
@@ -440,10 +466,12 @@ extension LiveActivityBridge: SuggestionObserver, EnactedSuggestionObserver {
             readings: settings.liveActivityChart ? coreDataStorage.fetchGlucose(interval: DateFilter().twoHours) : nil,
             predictions: settings.liveActivityChart && settings.liveActivityChartShowPredictions ? suggestion.predictions : nil,
             showChart: settings.liveActivityChart,
+            chartLayout: settings.liveActivityChartLayout,
             chartLowThreshold: settings.liveActivityChartThresholdLines ? Int(settings.low) : nil,
             chartHighThreshold: settings.liveActivityChartThresholdLines ? Int(settings.high) : nil,
             chartMaxValue: settings.liveActivityChartDynamicRange ? nil : 300, // mg/dl
-            eventualText: !settings.liveActivityEventualArrow
+            eventualText: !settings.liveActivityEventualArrow,
+            smallStatus: settings.liveActivitySmallStatus
         ) else {
             return
         }

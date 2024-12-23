@@ -101,10 +101,36 @@ struct LiveActivity: Widget {
         return (stack, characters)
     }
 
+    private func bg(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
+        let bgText = context.state.bg
+        return Text(bgText)
+            .foregroundStyle(context.isStale ? .secondary : Color.primary)
+    }
+
+    private func eventual(context: ActivityViewContext<LiveActivityAttributes>) -> some View {
+        HStack {
+            Text(LiveActivity.eventualSymbol)
+                .foregroundStyle(.secondary)
+                .font(.system(size: UIFont.systemFontSize * 1.5))
+                .frame(height: UIFont.systemFontSize)
+            Text(context.state.eventual)
+        }
+    }
+
+    private func trend(context: ActivityViewContext<LiveActivityAttributes>) -> some View {
+        HStack {
+            if let direction = context.state.direction {
+                let text = Text(direction)
+                text.scaleEffect(x: 0.7, y: 0.7, anchor: .center) // .padding(.trailing, -5)
+            }
+        }
+        .foregroundStyle(context.isStale ? .secondary : Color.primary)
+    }
+
     private func iob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
         HStack(spacing: 0) {
             Text(context.state.iob)
-            Text(" U").opacity(0.7).scaleEffect(0.8)
+            Text(" U")
         }
         .foregroundStyle(.cyan)
     }
@@ -112,15 +138,15 @@ struct LiveActivity: Widget {
     private func cob(context: ActivityViewContext<LiveActivityAttributes>, size _: Size) -> some View {
         HStack(spacing: 0) {
             Text(context.state.cob)
-            Text(" g").opacity(0.7).scaleEffect(0.8)
+            Text(" g")
         }
         .foregroundStyle(.loopYellow)
     }
 
     private func loop(context: ActivityViewContext<LiveActivityAttributes>, size: CGFloat) -> some View {
         let timeAgo = abs(context.state.loopDate.timeIntervalSinceNow) / 60
-        let color: Color = timeAgo > 8 ? .loopYellow : timeAgo > 12 ? .loopRed : .green
-        return LoopActivity(stroke: color, compact: size == 12).frame(width: size)
+        let color: Color = timeAgo > 8 ? .loopYellow : timeAgo > 12 ? .loopRed : .loopGreen
+        return LoopActivity(stroke: color, compact: size == 12).frame(width: size, height: size)
     }
 
     private var emptyText: some View {
@@ -128,9 +154,6 @@ struct LiveActivity: Widget {
     }
 
     private static let eventualSymbol = "⇢"
-//    private static let eventualSymbol = "⌖"
-//    private static let eventualSymbol = "◎"
-//    private static let eventualSymbol = "⊙"
 
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LiveActivityAttributes.self) { context in
@@ -138,44 +161,64 @@ struct LiveActivity: Widget {
             VStack(spacing: 2) {
                 if !context.state.showChart {
                     ZStack {
-                        updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                        HStack {
+                            if context.state.smallStatus {
+                                loop(context: context, size: 10)
+                                    .padding(.top, 1)
+                            }
+                            updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
+                        }.frame(maxWidth: .infinity, alignment: .trailing)
                     }
                 }
-                HStack {
-                    let loopCircle =
-                        VStack {
+                HStack(alignment: .top) {
+                    HStack(alignment: .top) {
+                        if context.state.chartLayout == .EventualOnTheRightWithTime || !context.state.smallStatus {
                             loop(context: context, size: 22)
+                                .padding(.top, 6)
+                            Spacer()
+                        }
+                        VStack(spacing: 0) {
+                            bgAndTrend(context: context, size: .expanded).0.font(.title) // .background(.green)
                             if !context.state.showChart {
-                                emptyText
+                                changeLabel(context: context)
+                                    .font(.caption)
+                                    .foregroundStyle(.primary.opacity(0.7))
+                                    .offset(x: -12 /* , y: -5 */ )
+                                // .background(.blue)
+                            } else {
+                                if context.state.chartLayout == .EventualAtTheTop {
+                                    HStack {
+                                        changeLabel(context: context)
+                                            .font(.caption)
+                                            .foregroundStyle(.primary.opacity(0.7))
+                                        //                                        .offset(y: -5)
+                                        eventual(context: context) // adds .offset(y: -5) to textx
+                                            .font(.caption)
+                                            .foregroundStyle(.primary.opacity(0.7))
+                                    }.padding(0) // .background(.blue)
+                                }
                             }
                         }
-                    if !context.state.showChart {
-                        loopCircle.offset(x: 0, y: 2)
-                    } else {
-                        loopCircle
-                    }
-                    Spacer()
-                    VStack {
-                        bgAndTrend(context: context, size: .expanded).0.font(.title)
-                        if !context.state.showChart {
-                            changeLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
-                                .offset(x: -12, y: -5)
+                        Spacer()
+                        VStack {
+                            iob(context: context, size: .expanded).font(.title)
+                            emptyText
                         }
-                    }
-                    Spacer()
-                    VStack {
-                        iob(context: context, size: .expanded).font(.title)
-                        if !context.state.showChart {
+                        Spacer()
+                        VStack {
+                            cob(context: context, size: .expanded).font(.title)
                             emptyText
                         }
                     }
-                    Spacer()
-                    VStack {
-                        cob(context: context, size: .expanded).font(.title)
-                        if !context.state.showChart {
-                            emptyText
-                        }
+                    if context.state.showChart && context.state.chartLayout != .EventualOnTheRightWithTime {
+                        HStack {
+                            if context.state.smallStatus {
+                                loop(context: context, size: 10)
+                                    .padding(.top, 1)
+                            }
+                            updatedLabel(context: context)
+                                .font(.caption).foregroundStyle(.primary.opacity(0.7))
+                        }.padding(.leading, 20)
                     }
                 }
 
@@ -183,18 +226,23 @@ struct LiveActivity: Widget {
                     HStack(alignment: .top) {
                         chartView(for: context.state)
                         Spacer()
-                        VStack(spacing: -2) {
-                            Text(LiveActivity.eventualSymbol)
-                                .foregroundStyle(.secondary)
-//                            .opacity(0.7)
-                                .font(.system(size: UIFont.systemFontSize * 1.5))
-                            Text(context.state.eventual)
-                            Spacer()
-                            updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
+                        if context.state.chartLayout == .EventualOnTheRightWithTime ||
+                            context.state.chartLayout == .EventualOnTheRight
+                        {
+                            VStack(spacing: -2) {
+                                Text(LiveActivity.eventualSymbol)
+                                    .foregroundStyle(.secondary)
+                                    .font(.system(size: UIFont.systemFontSize * 1.5))
+                                Text(context.state.eventual)
+                                if context.state.chartLayout == .EventualOnTheRightWithTime {
+                                    Spacer()
+                                    updatedLabel(context: context).font(.caption).foregroundStyle(.primary.opacity(0.7))
+                                }
+                            }
                         }
                     }
                 }
-                if !context.state.showChart {
+                if !context.state.showChart || context.state.chartLayout == .EventualAtTheBottom {
                     HStack {
                         Spacer()
                         if context.state.eventualText {
@@ -202,6 +250,7 @@ struct LiveActivity: Widget {
                             Spacer()
                         } else {
                             Text("⇢").foregroundStyle(.secondary).font(.system(size: UIFont.systemFontSize * 1.8))
+                                .frame(height: UIFont.systemFontSize)
                         }
                         Text(context.state.eventual)
                         Text(context.state.mmol ? NSLocalizedString(
@@ -211,7 +260,7 @@ struct LiveActivity: Widget {
                             "mg/dL",
                             comment: "The short unit display string for milligrams of glucose per decilter"
                         )).foregroundStyle(.secondary)
-                    }.padding(.top, context.state.showChart ? 0 : 10)
+                    }.padding(.top, 10 /* context.state.showChart ? 0 : 10 */ )
                 }
             }
             .privacySensitive()
@@ -366,16 +415,20 @@ struct LiveActivity: Widget {
                 .lineStyle(StrokeStyle(lineWidth: 1.0))
             }
 
+            let predictionsOpacity = 0.3
+            let predictionsSymbolSize = CGFloat(20)
+
             if haveReadings, let iob = state.predictions?.iob.map({
                 updateMinMax(makePoints($0.dates, $0.values, mmol: state.mmol))
             }) {
                 ForEach(iob, id: \.date) { point in
                     PointMark(
                         x: .value("Time", point.date),
-                        y: .value("Glucose", point.value)
+                        y: .value("IOB", point.value)
                     )
-                    .symbolSize(10)
-                    .foregroundStyle(Color.insulin.opacity(0.5))
+                    .symbolSize(predictionsSymbolSize)
+                    .opacity(predictionsOpacity)
+                    .foregroundStyle(Color.insulin)
                 }
             }
             if haveReadings, let zt = state.predictions?.zt.map({
@@ -384,10 +437,11 @@ struct LiveActivity: Widget {
                 ForEach(zt, id: \.date) { point in
                     PointMark(
                         x: .value("Time", point.date),
-                        y: .value("Glucose", point.value)
+                        y: .value("ZT", point.value)
                     )
-                    .symbolSize(10)
-                    .foregroundStyle(Color.zt.opacity(0.5))
+                    .symbolSize(predictionsSymbolSize)
+                    .opacity(predictionsOpacity)
+                    .foregroundStyle(Color.zt)
                 }
             }
             if haveReadings, let cob = state.predictions?.cob.map({
@@ -396,10 +450,11 @@ struct LiveActivity: Widget {
                 ForEach(cob, id: \.date) { point in
                     PointMark(
                         x: .value("Time", point.date),
-                        y: .value("Glucose", point.value)
+                        y: .value("COB", point.value)
                     )
-                    .symbolSize(10)
-                    .foregroundStyle(Color.loopYellow.opacity(0.5))
+                    .symbolSize(predictionsSymbolSize)
+                    .opacity(predictionsOpacity)
+                    .foregroundStyle(Color.loopYellow)
                 }
             }
             if haveReadings, let uam = state.predictions?.uam.map({
@@ -408,10 +463,11 @@ struct LiveActivity: Widget {
                 ForEach(uam, id: \.date) { point in
                     PointMark(
                         x: .value("Time", point.date),
-                        y: .value("Glucose", point.value)
+                        y: .value("UAM", point.value)
                     )
-                    .symbolSize(10)
-                    .foregroundStyle(Color.uam.opacity(0.5))
+                    .symbolSize(predictionsSymbolSize)
+                    .opacity(predictionsOpacity)
+                    .foregroundStyle(Color.uam)
                 }
             }
 
@@ -421,17 +477,17 @@ struct LiveActivity: Widget {
                     state.mmol ? Double(chartHighThreshold) * 0.0555 : Double(chartHighThreshold)
                 ))
                     .foregroundStyle(.orange.opacity(0.6))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [1, 1]))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
             }
             if let chartLowThreshold = state.chartLowThreshold {
                 RuleMark(y: .value("Low Threshold", state.mmol ? Double(chartLowThreshold) * 0.0555 : Double(chartLowThreshold)))
                     .foregroundStyle(.red.opacity(0.6))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [1, 1]))
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
             }
 
-            RuleMark(x: .value("Now", Date.now))
-                .foregroundStyle(.secondary.opacity(0.8))
-                .lineStyle(StrokeStyle(lineWidth: 1, dash: [1, 1]))
+//            RuleMark(x: .value("Now", Date.now))
+//                .foregroundStyle(.secondary.opacity(0.8))
+//                .lineStyle(StrokeStyle(lineWidth: 1, dash: [1, 1]))
         }
         .chartYScale(domain: createYScale(state, maxValue, state.chartMaxValue))
         .chartXAxis {
@@ -443,11 +499,18 @@ struct LiveActivity: Widget {
         }
         .chartYAxis {
             if let minYMark, let maxYMark {
-                AxisMarks(position: .trailing, values: [
-                    minYMark,
-                    maxYMark
-                ]) { _ in
-                    AxisGridLine()
+                AxisMarks(
+                    position: .trailing,
+                    values:
+                    abs(maxYMark - minYMark) < 0.8 ? [
+                        (maxYMark + minYMark) / 2
+                    ] :
+                        [
+                            minYMark,
+                            maxYMark
+                        ]
+                ) { _ in
+//                    AxisGridLine()
                     AxisValueLabel(
                         format: glucoseFormatter
                     )
@@ -469,6 +532,112 @@ private extension LiveActivityAttributes.ContentState {
 
     // Use mmol/l notation with decimal point as well for the same reason, it uses up to 4 characters, while mg/dl uses up to 3
     static var testWide: LiveActivityAttributes.ContentState {
+        LiveActivityAttributes.ContentState(
+            bg: "10.7",
+            direction: "→",
+            change: "+0.1",
+            date: Date(),
+            iob: "1.2",
+            cob: "20",
+            loopDate: Date.now, eventual: "12.7", mmol: true,
+            readings: nil,
+            predictions: nil,
+            showChart: false,
+            chartLayout: .EventualAtTheBottom,
+            chartLowThreshold: nil,
+            chartHighThreshold: nil,
+            chartMaxValue: nil,
+            eventualText: true,
+            smallStatus: false
+        )
+    }
+
+    static var testVeryWide: LiveActivityAttributes.ContentState {
+        LiveActivityAttributes.ContentState(
+            bg: "10.7",
+            direction: "↑↑",
+            change: "+1.4",
+            date: Date(),
+            iob: "1.2",
+            cob: "20",
+            loopDate: Date.now, eventual: "12.7", mmol: true,
+            readings: nil,
+            predictions: nil,
+            showChart: false,
+            chartLayout: .EventualAtTheBottom,
+            chartLowThreshold: nil,
+            chartHighThreshold: nil,
+            chartMaxValue: nil,
+            eventualText: true,
+            smallStatus: false
+        )
+    }
+
+    static var testSuperWide: LiveActivityAttributes.ContentState {
+        LiveActivityAttributes.ContentState(
+            bg: "10.7",
+            direction: "↑↑↑",
+            change: "+2.1",
+            date: Date(),
+            iob: "1.2",
+            cob: "20",
+            loopDate: Date.now, eventual: "12.7", mmol: true,
+            readings: nil,
+            predictions: nil,
+            showChart: false,
+            chartLayout: .EventualAtTheBottom,
+            chartLowThreshold: nil,
+            chartHighThreshold: nil,
+            chartMaxValue: nil,
+            eventualText: true,
+            smallStatus: false
+        )
+    }
+
+    // 2 characters for BG, 1 character for change is the minimum that will be shown
+    static var testNarrow: LiveActivityAttributes.ContentState {
+        LiveActivityAttributes.ContentState(
+            bg: "10.7",
+            direction: "↑",
+            change: "+0.7",
+            date: Date(),
+            iob: "1.2",
+            cob: "20",
+            loopDate: Date.now, eventual: "12.7", mmol: true,
+            readings: nil,
+            predictions: nil,
+            showChart: false,
+            chartLayout: .EventualAtTheBottom,
+            chartLowThreshold: nil,
+            chartHighThreshold: nil,
+            chartMaxValue: nil,
+            eventualText: true,
+            smallStatus: false
+        )
+    }
+
+    static var testMedium: LiveActivityAttributes.ContentState {
+        LiveActivityAttributes.ContentState(
+            bg: "10.7",
+            direction: "↗︎",
+            change: "+0.8",
+            date: Date(),
+            iob: "1.2",
+            cob: "20",
+            loopDate: Date.now, eventual: "12.7", mmol: true,
+            readings: nil,
+            predictions: nil,
+            showChart: false,
+            chartLayout: .EventualAtTheBottom,
+            chartLowThreshold: nil,
+            chartHighThreshold: nil,
+            chartMaxValue: nil,
+            eventualText: true,
+            smallStatus: false
+        )
+    }
+
+    static var chart1: LiveActivityAttributes.ContentState {
         let sampleData = SampleData()
         return LiveActivityAttributes.ContentState(
             bg: "10.7",
@@ -481,14 +650,16 @@ private extension LiveActivityAttributes.ContentState {
             readings: sampleData.sampleReadings,
             predictions: sampleData.samplePredictions,
             showChart: true,
+            chartLayout: .EventualAtTheBottom,
             chartLowThreshold: 75,
             chartHighThreshold: 200,
             chartMaxValue: 400,
-            eventualText: false
+            eventualText: false,
+            smallStatus: true
         )
     }
 
-    static var testVeryWide: LiveActivityAttributes.ContentState {
+    static var chart2: LiveActivityAttributes.ContentState {
         let sampleData = SampleData()
         return LiveActivityAttributes.ContentState(
             bg: "10.7",
@@ -501,14 +672,16 @@ private extension LiveActivityAttributes.ContentState {
             readings: sampleData.sampleReadings,
             predictions: nil,
             showChart: true,
-            chartLowThreshold: nil,
-            chartHighThreshold: nil,
+            chartLayout: .EventualAtTheTop,
+            chartLowThreshold: 75,
+            chartHighThreshold: 200,
             chartMaxValue: 400,
-            eventualText: true
+            eventualText: true,
+            smallStatus: false
         )
     }
 
-    static var testSuperWide: LiveActivityAttributes.ContentState {
+    static var chart3: LiveActivityAttributes.ContentState {
         let sampleData = SampleData()
         return LiveActivityAttributes.ContentState(
             bg: "10.7",
@@ -521,15 +694,17 @@ private extension LiveActivityAttributes.ContentState {
             readings: sampleData.sampleReadings,
             predictions: sampleData.samplePredictions,
             showChart: true,
+            chartLayout: .EventualOnTheRight,
             chartLowThreshold: 75,
             chartHighThreshold: 200,
             chartMaxValue: nil,
-            eventualText: false
+            eventualText: true,
+            smallStatus: false
         )
     }
 
     // 2 characters for BG, 1 character for change is the minimum that will be shown
-    static var testNarrow: LiveActivityAttributes.ContentState {
+    static var chart4: LiveActivityAttributes.ContentState {
         let sampleData = SampleData()
         return LiveActivityAttributes.ContentState(
             bg: "10.7",
@@ -541,15 +716,17 @@ private extension LiveActivityAttributes.ContentState {
             loopDate: Date.now, eventual: "12.7", mmol: true,
             readings: sampleData.sampleReadings,
             predictions: nil,
-            showChart: false,
+            showChart: true,
+            chartLayout: .EventualOnTheRight,
             chartLowThreshold: nil,
             chartHighThreshold: nil,
             chartMaxValue: nil,
-            eventualText: true
+            eventualText: false,
+            smallStatus: true
         )
     }
 
-    static var testMedium: LiveActivityAttributes.ContentState {
+    static var chart5: LiveActivityAttributes.ContentState {
         let sampleData = SampleData()
         return LiveActivityAttributes.ContentState(
             bg: "10.7",
@@ -562,38 +739,70 @@ private extension LiveActivityAttributes.ContentState {
             readings: sampleData.sampleReadings,
             predictions: nil,
             showChart: true,
+            chartLayout: .EventualOnTheRightWithTime,
             chartLowThreshold: nil,
             chartHighThreshold: nil,
             chartMaxValue: nil,
-            eventualText: true
+            eventualText: true,
+            smallStatus: false
+        )
+    }
+
+    static var chart6: LiveActivityAttributes.ContentState {
+        let sampleData = SampleData()
+        return LiveActivityAttributes.ContentState(
+            bg: "10.7",
+            direction: "↗︎",
+            change: "+0.8",
+            date: Date(),
+            iob: "1.2",
+            cob: "20",
+            loopDate: Date.now, eventual: "12.7", mmol: true,
+            readings: sampleData.sampleReadings,
+            predictions: nil,
+            showChart: true,
+            chartLayout: .NoEventual,
+            chartLowThreshold: nil,
+            chartHighThreshold: nil,
+            chartMaxValue: nil,
+            eventualText: true,
+            smallStatus: false
         )
     }
 }
 
 struct SampleData {
-    let sampleReadings: LiveActivityAttributes.ValueSeries = {
+    let sampleReadings: LiveActivityAttributes.ValueSeries
+    let samplePredictions: LiveActivityAttributes.ActivityPredictions
+
+    init() {
+        let currentReading = Int16(clamping: 100 + Int.random(in: 0 ... 100))
+        let currentReadingDate = Date()
+
         let calendar = Calendar.current
         let now = Date()
 
-        let dates = Array((0 ..< 2 * 12).map { minutesAgoX5 in
+        let readingDates = Array((0 ..< 2 * 12).map { minutesAgoX5 in
             calendar.date(byAdding: .minute, value: -minutesAgoX5 * 5, to: now)!
         }.reversed())
 
-        var current: Int = 100 + Int.random(in: 0 ... 100)
-        let values: [Int16] = Array((0 ..< 2 * 12).map { _ in
+        var current = Int(currentReading)
+        let readingValues: [Int16] = Array((0 ..< 2 * 12).map { _ in
             current = current + Int.random(in: 10 ... 20) * Int.random(in: -50 ... 50).signum()
+//            current = 100 + Int.random(in: 0 ... 5) * Int.random(in: -50 ... 50).signum()
             if current < 100 {
                 current = 100 + Int.random(in: 0 ... 10)
             }
             return Int16(clamping: current)
         }.reversed())
 
-        return LiveActivityAttributes.ValueSeries(dates: dates, values: values)
-    }()
+        sampleReadings = LiveActivityAttributes.ValueSeries(
+            dates: readingDates.dropLast(),
+            values: readingValues.dropLast()
+        )
 
-    var samplePredictions: LiveActivityAttributes.ActivityPredictions {
-        let lastGlucose = Double(sampleReadings.values.last!)
-        let lastDate = sampleReadings.dates.last!
+        let lastGlucose = Double(readingValues.last!)
+        let lastDate = readingDates.last!
 
         let numberOfPoints = 2 * 60 / 5 // 2 hours with 5-minute steps
 
@@ -642,7 +851,7 @@ struct SampleData {
         let cob = generateCurve(startValue: lastGlucose, pattern: "peak")
         let uam = generateCurve(startValue: lastGlucose, pattern: "up")
 
-        return LiveActivityAttributes.ActivityPredictions(
+        samplePredictions = LiveActivityAttributes.ActivityPredictions(
             iob: iob,
             zt: zt,
             cob: cob,
@@ -665,6 +874,12 @@ extension Color {
     LiveActivityAttributes.ContentState.testWide
     LiveActivityAttributes.ContentState.testMedium
     LiveActivityAttributes.ContentState.testNarrow
+    LiveActivityAttributes.ContentState.chart1
+    LiveActivityAttributes.ContentState.chart2
+    LiveActivityAttributes.ContentState.chart3
+    LiveActivityAttributes.ContentState.chart4
+    LiveActivityAttributes.ContentState.chart5
+    LiveActivityAttributes.ContentState.chart6
 }
 
 struct LoopActivity: View {
