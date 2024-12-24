@@ -44,12 +44,8 @@ extension LiveActivityAttributes.ContentState {
         readings: [Readings]?,
         predictions: Predictions?,
         showChart: Bool,
-        chartLayout: ActivityChartLayout,
-        chartLowThreshold: Int?,
-        chartHighThreshold: Int?,
-        chartMaxValue: Int?,
-        eventualText: Bool,
-        smallStatus: Bool
+        chartLowThreshold: Int,
+        chartHighThreshold: Int
     ) {
         guard let glucose = bg?.glucose else {
             return nil
@@ -115,30 +111,9 @@ extension LiveActivityAttributes.ContentState {
             readings: preparedReadings,
             predictions: activityPredictions,
             showChart: showChart,
-            chartLayout: chartLayout.toLiveActivityAttributes,
-            chartLowThreshold: chartLowThreshold.map({ Int16(clamping: $0) }),
-            chartHighThreshold: chartHighThreshold.map({ Int16(clamping: $0) }),
-            chartMaxValue: chartMaxValue.map({ Int16(clamping: $0) }),
-            eventualText: eventualText,
-            smallStatus: smallStatus
+            chartLowThreshold: Int16(clamping: chartLowThreshold),
+            chartHighThreshold: Int16(clamping: chartHighThreshold)
         )
-    }
-}
-
-extension ActivityChartLayout {
-    var toLiveActivityAttributes: LiveActivityAttributes.ActivityChartLayout {
-        switch self {
-        case .EventualAtTheTop:
-            return .EventualAtTheTop
-        case .EventualAtTheBottom:
-            return .EventualAtTheBottom
-        case .EventualOnTheRight:
-            return .EventualOnTheRight
-        case .EventualOnTheRightWithTime:
-            return .EventualOnTheRightWithTime
-        case .NoEventual:
-            return .NoEventual
-        }
     }
 }
 
@@ -216,11 +191,7 @@ extension ActivityChartLayout {
         if let knownSettings = self.knownSettings {
             if newSettings.useLiveActivity != knownSettings.useLiveActivity ||
                 newSettings.liveActivityChart != knownSettings.liveActivityChart ||
-                newSettings.liveActivityChartShowPredictions != knownSettings.liveActivityChartShowPredictions ||
-                newSettings.liveActivityChartThresholdLines != knownSettings.liveActivityChartThresholdLines ||
-                newSettings.liveActivityChartDynamicRange != knownSettings.liveActivityChartDynamicRange ||
-                newSettings.liveActivityEventualArrow != knownSettings.liveActivityEventualArrow ||
-                newSettings.liveActivitySmallStatus != knownSettings.liveActivitySmallStatus
+                newSettings.liveActivityChartShowPredictions != knownSettings.liveActivityChartShowPredictions
             {
                 print("live activity settings changed")
                 forceActivityUpdate(force: true)
@@ -279,40 +250,11 @@ extension ActivityChartLayout {
                 let encoder = JSONEncoder()
                 let encodedLength: Int = {
                     if let data = try? encoder.encode(state) {
-//                         if let jsonString = String(data: data, encoding: .utf8) {
-//                             print("activity payload: \(jsonString)")
-//                         }
-
                         return data.count
                     } else {
                         return 0
                     }
                 }()
-
-//                TODO: remove these, debugging only
-//                print("!!!! Payload size: \(encodedLength) bytes")
-//                if let data = try? encoder.encode(state.readings) {
-//                    print("!!!! Payload size - readings: \(data.count) bytes")
-//                }
-//                if let data = try? encoder.encode(state.predictions) {
-//                    print("!!!! Payload size - predictions: \(data.count) bytes")
-//                }
-//                if let data = try? encoder.encode(state.predictions?.iob) {
-//                    print("!!!! Payload size - predictions.iob: \(data.count) bytes")
-//                    print("!!!! Payload size - predictions.iob: \(state.predictions?.iob?.count ?? 0) items")
-//                }
-//                if let data = try? encoder.encode(state.predictions?.cob) {
-//                    print("!!!! Payload size - predictions.cob: \(data.count) bytes")
-//                    print("!!!! Payload size - predictions.cob: \(state.predictions?.cob?.count ?? 0) items")
-//                }
-//                if let data = try? encoder.encode(state.predictions?.zt) {
-//                    print("!!!! Payload size - predictions.zt: \(data.count) bytes")
-//                    print("!!!! Payload size - predictions.zt: \(state.predictions?.zt?.count ?? 0) items")
-//                }
-//                if let data = try? encoder.encode(state.predictions?.uam) {
-//                    print("!!!! Payload size - predictions.uam: \(data.count) bytes")
-//                    print("!!!! Payload size - predictions.uam: \(state.predictions?.uam?.count ?? 0) items")
-//                }
 
                 let content = {
                     if encodedLength > 4 * 1024 { // size limit
@@ -351,14 +293,8 @@ extension ActivityChartLayout {
                         readings: nil,
                         predictions: nil,
                         showChart: settings.liveActivityChart,
-                        chartLayout: settings.liveActivityChartLayout.toLiveActivityAttributes,
-                        chartLowThreshold: settings
-                            .liveActivityChartThresholdLines ? Int16(clamping: (settings.low as NSDecimalNumber).intValue) : nil,
-                        chartHighThreshold: settings
-                            .liveActivityChartThresholdLines ? Int16(clamping: (settings.high as NSDecimalNumber).intValue) : nil,
-                        chartMaxValue: settings.liveActivityChartDynamicRange ? nil : 300, // mg/dl
-                        eventualText: !settings.liveActivityEventualArrow,
-                        smallStatus: settings.liveActivitySmallStatus
+                        chartLowThreshold: Int16(clamping: (settings.low as NSDecimalNumber).intValue),
+                        chartHighThreshold: Int16(clamping: (settings.high as NSDecimalNumber).intValue)
                     ),
                     staleDate: Date.now.addingTimeInterval(60)
                 )
@@ -424,12 +360,8 @@ extension LiveActivityBridge: SuggestionObserver, EnactedSuggestionObserver {
             predictions: settings.liveActivityChartShowPredictions && settings.liveActivityChartShowPredictions ? suggestion
                 .predictions : nil,
             showChart: settings.liveActivityChart,
-            chartLayout: settings.liveActivityChartLayout,
-            chartLowThreshold: settings.liveActivityChartThresholdLines ? Int(settings.low) : nil,
-            chartHighThreshold: settings.liveActivityChartThresholdLines ? Int(settings.high) : nil,
-            chartMaxValue: settings.liveActivityChartDynamicRange ? nil : 300, // mg/dl
-            eventualText: !settings.liveActivityEventualArrow,
-            smallStatus: settings.liveActivitySmallStatus
+            chartLowThreshold: Int(settings.low),
+            chartHighThreshold: Int(settings.high)
         ) else {
             return
         }
@@ -466,12 +398,8 @@ extension LiveActivityBridge: SuggestionObserver, EnactedSuggestionObserver {
             readings: settings.liveActivityChart ? coreDataStorage.fetchGlucose(interval: DateFilter().twoHours) : nil,
             predictions: settings.liveActivityChart && settings.liveActivityChartShowPredictions ? suggestion.predictions : nil,
             showChart: settings.liveActivityChart,
-            chartLayout: settings.liveActivityChartLayout,
-            chartLowThreshold: settings.liveActivityChartThresholdLines ? Int(settings.low) : nil,
-            chartHighThreshold: settings.liveActivityChartThresholdLines ? Int(settings.high) : nil,
-            chartMaxValue: settings.liveActivityChartDynamicRange ? nil : 300, // mg/dl
-            eventualText: !settings.liveActivityEventualArrow,
-            smallStatus: settings.liveActivitySmallStatus
+            chartLowThreshold: Int(settings.low),
+            chartHighThreshold: Int(settings.high)
         ) else {
             return
         }
