@@ -59,7 +59,7 @@ extension AddCarbs {
                             value: $state.carbs,
                             formatter: formatter,
                             autofocus: true,
-                            cleanInput: true
+                            liveEditing: true
                         )
                         Text("grams").foregroundColor(.secondary)
                     }
@@ -285,7 +285,7 @@ extension AddCarbs {
                     value: $state.fat,
                     formatter: formatter,
                     autofocus: false,
-                    cleanInput: true
+                    liveEditing: true
                 )
                 Text("grams").foregroundColor(.secondary)
             }
@@ -297,7 +297,7 @@ extension AddCarbs {
                     value: $state.protein,
                     formatter: formatter,
                     autofocus: false,
-                    cleanInput: true
+                    liveEditing: true
                 ).foregroundColor(.loopRed)
 
                 Text("grams").foregroundColor(.secondary)
