@@ -32,6 +32,30 @@ final class OverrideStorage {
         return overrideArray
     }
 
+    func fetchLatestAutoISFsettings() -> [Auto_ISF] {
+        var array = [Auto_ISF]()
+        coredataContext.performAndWait {
+            let request = Auto_ISF.fetchRequest() as NSFetchRequest<Auto_ISF>
+            let sort = NSSortDescriptor(key: "date", ascending: false)
+            request.sortDescriptors = [sort]
+            request.fetchLimit = 1
+            try? array = self.coredataContext.fetch(request)
+        }
+        return array
+    }
+
+    func fetchAutoISFsetting(id: String) -> Auto_ISF? {
+        var array = [Auto_ISF]()
+        coredataContext.performAndWait {
+            let request = Auto_ISF.fetchRequest() as NSFetchRequest<Auto_ISF>
+            request.predicate = NSPredicate(
+                format: "id == %@", id as String
+            )
+            try? array = self.coredataContext.fetch(request)
+        }
+        return array.first
+    }
+
     func fetchNumberOfOverrides(numbers: Int) -> [Override] {
         var overrideArray = [Override]()
         coredataContext.performAndWait {
@@ -102,6 +126,8 @@ final class OverrideStorage {
             save.uamMinutes = preset.uamMinutes
             save.maxIOB = preset.maxIOB
             save.target = preset.target
+            save.overrideMaxIOB = preset.overrideAutoISF
+            save.overrideAutoISF = preset.overrideAutoISF
             try? coredataContext.save()
         }
     }
@@ -198,6 +224,8 @@ final class OverrideStorage {
             save.smbMinutes = override.smbMinutes
             save.uamMinutes = override.uamMinutes
             save.target = override.target
+            save.overrideMaxIOB = override.overrideAutoISF
+            save.overrideAutoISF = override.overrideAutoISF
             try? coredataContext.save()
         }
     }
@@ -288,6 +316,8 @@ final class OverrideStorage {
                 save.smbIsOff = preset.smbIsOff
                 save.smbMinutes = preset.smbMinutes
                 save.uamMinutes = preset.uamMinutes
+                save.overrideMaxIOB = preset.overrideAutoISF
+                save.overrideAutoISF = preset.overrideAutoISF
                 if (preset.target ?? 0) as Decimal > 6 {
                     save.target = preset.target
                 } else { save.target = 6 }
