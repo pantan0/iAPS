@@ -218,14 +218,14 @@ extension Home {
 
                 ZStack {
                     HStack {
-                        Text("⇢").font(.statusFont).foregroundStyle(.purple)
+                        Text("⇢").font(.statusFont).foregroundStyle(.mint)
 
                         if let eventualBG = state.eventualBG {
                             Text(
                                 fetchedTargetFormatter.string(
                                     from: (state.data.units == .mmolL ? eventualBG.asMmolL : Decimal(eventualBG)) as NSNumber
                                 ) ?? ""
-                            ).font(.statusFont).foregroundColor(colorScheme == .dark ? .purple : .black)
+                            ).font(.statusFont).foregroundColor(colorScheme == .dark ? .mint : .black)
                         } else {
                             Text("?").font(.statusFont).foregroundStyle(.secondary)
                         }

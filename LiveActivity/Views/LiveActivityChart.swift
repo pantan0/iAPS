@@ -293,13 +293,15 @@ struct LiveActivityChart: View {
         // Eventual Glucose
         HStack(spacing: 4) {
             Text(EventualSymbol)
-                .font(.system(size: 16))
+                .font(.system(size: 20))
+                .foregroundStyle(Color(.mint))
                 .opacity(0.7)
 
             Text(context.state.eventual)
                 .font(.system(size: 16))
+                .foregroundStyle(Color(.mint))
                 .opacity(0.8)
-                .fontWidth(.condensed)
+                .fontWeight(.semibold)
         }
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
@@ -308,7 +310,7 @@ struct LiveActivityChart: View {
 
         // Timestamp
         updatedLabel(context: context)
-            .font(.system(size: 11))
+            .font(.system(size: 14))
             .foregroundStyle(context.isStale ? Color(.loopRed) : .white.opacity(0.7))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.vertical, 10).padding(.leading, 50)
