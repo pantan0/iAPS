@@ -267,12 +267,12 @@ struct LiveActivityChart: View {
                 HStack(spacing: 0.5) {
                     Text(context.state.iob)
                         .font(.system(size: 20))
-                        .foregroundStyle(Color(.insulin))
+                        .foregroundStyle(Color(.cyan))
                     Text("U")
                         .font(.system(size: 20).smallCaps())
-                        .foregroundStyle(Color(.insulin))
+                        .foregroundStyle(Color(.cyan))
                 }
-                .fontWidth(.condensed)
+                .fontWidth(.standard)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 HStack(spacing: 0.5) {
