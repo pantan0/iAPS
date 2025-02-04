@@ -272,7 +272,7 @@ struct LiveActivityChart: View {
                         .font(.system(size: 20).smallCaps())
                         .foregroundStyle(Color(.cyan))
                 }
-                .fontWidth(.standard)
+                .fontWidth(.condensed)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 HStack(spacing: 0.5) {
