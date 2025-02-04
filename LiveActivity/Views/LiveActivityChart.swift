@@ -264,25 +264,25 @@ struct LiveActivityChart: View {
 
         Grid(horizontalSpacing: 0) {
             GridRow {
-                HStack(spacing: 0.5) {
+                HStack(spacing: 0) {
                     Text(context.state.iob)
                         .font(.system(size: 20))
-                        .foregroundStyle(Color(.cyan))
-                    Text("U")
-                        .font(.system(size: 20).smallCaps())
-                        .foregroundStyle(Color(.cyan))
+                        .foregroundStyle(Color(.insulin))
+                    //   Text("U")
+                    //       .font(.system(size: 20).smallCaps())
+                    //       .foregroundStyle(Color(.cyan))
                 }
-                .fontWidth(.condensed)
+                .fontWidth(.standard)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                HStack(spacing: 0.5) {
+                HStack(spacing: 0) {
                     Text(context.state.cob)
                         .foregroundStyle(Color(.loopYellow))
-                    Text("g")
-                        .foregroundStyle(Color(.loopYellow))
+                    // Text("g")
+                    //     .foregroundStyle(Color(.loopYellow))
                 }
                 .font(.system(size: 20))
-                .fontWidth(.condensed)
+                .fontWidth(.standard)
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
