@@ -1,3 +1,4 @@
+import Foundation
 import LoopKit
 import SwiftUI
 import Swinject
@@ -12,6 +13,7 @@ extension Bolus {
         @Injected() var settings: SettingsManager!
         @Injected() var nsManager: NightscoutManager!
         @Injected() var announcementStorage: AnnouncementsStorage!
+        @Injected() var carbsStorage: CarbsStorage!
 
         @Published var suggestion: Suggestion?
         @Published var predictions: Predictions?
@@ -34,6 +36,7 @@ extension Bolus {
         @Published var carbRatio: Decimal = 0
 
         var waitForSuggestionInitial: Bool = false
+        @Published var waitForCarbs: Bool = false
 
         // added for bolus calculator
         @Published var recentGlucose: BloodGlucose?
@@ -69,8 +72,11 @@ extension Bolus {
         @Published var closedLoop: Bool = false
         @Published var loopDate: Date = .distantFuture
         @Published var now = Date.now
+        @Published var bolus: Decimal = 0
+        @Published var carbToStore = [CarbsEntry]()
 
         let loopReminder: CGFloat = 4
+        let coreDataStorage = CoreDataStorage()
 
         private var loopFormatter: NumberFormatter {
             let formatter = NumberFormatter()
@@ -80,13 +86,11 @@ extension Bolus {
         }
 
         override func subscribe() {
-            setupInsulinRequired()
             broadcaster.register(SuggestionObserver.self, observer: self)
             units = settingsManager.settings.units
             minimumPrediction = settingsManager.settings.minumimPrediction
             threshold = settingsManager.preferences.threshold_setting
             maxBolus = provider.pumpSettings().maxBolus
-            // added
             fraction = settings.settings.overrideFactor
             useCalc = settings.settings.useCalc
             fattyMeals = settings.settings.fattyMeals
@@ -98,24 +102,32 @@ extension Bolus {
             loopDate = apsManager.lastLoopDate
 
             if waitForSuggestionInitial {
-                apsManager.determineBasal()
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] ok in
-                        guard let self = self else { return }
-                        if !ok {
-                            self.waitForSuggestion = false
-                            self.insulinRequired = 0
-                            self.insulinRecommended = 0
-                        }
-                    }.store(in: &lifetime)
-                loopDate = apsManager.lastLoopDate
-            }
-            if let notNilSugguestion = provider.suggestion {
-                suggestion = notNilSugguestion
-                if let notNilPredictions = suggestion?.predictions {
-                    predictions = notNilPredictions
+                if waitForCarbs {
+                    setupBolusData()
+                } else {
+                    apsManager.determineBasal()
+                        .receive(on: DispatchQueue.main)
+                        .sink { [weak self] ok in
+                            guard let self = self else { return }
+                            if !ok {
+                                self.waitForSuggestion = false
+                                self.insulinRequired = 0
+                                self.insulinRecommended = 0
+                            }
+
+                            if let notNilSugguestion = provider.suggestion {
+                                suggestion = notNilSugguestion
+                                if let notNilPredictions = suggestion?.predictions {
+                                    predictions = notNilPredictions
+                                }
+                            }
+
+                        }.store(in: &lifetime)
+                    loopDate = apsManager.lastLoopDate
                 }
             }
+
+            setupInsulinRequired()
         }
 
         func getDeltaBG() {
@@ -145,7 +157,7 @@ extension Bolus {
             fifteenMinInsulin = isf == 0 ? 0 : (deltaBG * conversion) / isf
 
             // determine whole COB for which we want to dose insulin for and then determine insulin for wholeCOB
-            wholeCobInsulin = carbRatio != 0 ? cob / carbRatio : 0
+            wholeCobInsulin = carbRatio != 0 ? max(cob, temporaryCarbs) / carbRatio : 0
 
             // determine how much the calculator reduces/ increases the bolus because of IOB
             iobInsulinReduction = (-1) * iob
@@ -190,9 +202,20 @@ extension Bolus {
             return insulinCalculated
         }
 
+        var temporaryCarbs: Decimal {
+            var temporaryCarbs: Decimal = 0
+            let temporary = carbToStore.first
+            let timeDifference = (temporary?.actualDate ?? .distantPast).timeIntervalSinceNow
+            if timeDifference <= 0, timeDifference > -15.minutes.timeInterval {
+                temporaryCarbs = temporary?.carbs ?? 0
+            }
+            return temporaryCarbs
+        }
+
         func add() {
             guard amount > 0 else {
                 showModal(for: nil)
+                save()
                 return
             }
 
@@ -201,16 +224,26 @@ extension Bolus {
             unlockmanager.unlock()
                 .sink { _ in } receiveValue: { [weak self] _ in
                     guard let self = self else { return }
+                    self.save()
                     self.apsManager.enactBolus(amount: maxAmount, isSMB: false)
                     self.showModal(for: nil)
                 }
                 .store(in: &lifetime)
         }
 
+        func save() {
+            guard !empty else {
+                print("No Meal to save")
+                return
+            }
+            carbsStorage.storeCarbs(carbToStore)
+            print("Meal saved; carbs: \(carbToStore.first?.carbs ?? 0)")
+        }
+
         func setupInsulinRequired() {
             let conversion: Decimal = units == .mmolL ? 0.0555 : 1
             DispatchQueue.main.async {
-                if let suggestion = self.provider.suggestion {
+                if let suggestion = self.suggestion {
                     self.insulinRequired = suggestion.insulinReq ?? 0
                     self.evBG = Decimal(suggestion.eventualBG ?? 0) * conversion
                     self.iob = suggestion.iob ?? 0
@@ -235,46 +268,22 @@ extension Bolus {
             }
         }
 
-        func backToCarbsView(
-            complexEntry: Bool,
-            _ meal: FetchedResults<Meals>,
-            override: Bool,
-            deleteNothing: Bool,
-            editMode: Bool
-        ) {
-            if !deleteNothing { delete(deleteTwice: complexEntry, meal: meal) }
+        func backToCarbsView(override: Bool, editMode: Bool) {
             showModal(for: .addCarbs(editMode: editMode, override: override))
         }
 
-        func delete(deleteTwice: Bool, meal: FetchedResults<Meals>) {
-            guard let meals = meal.first else {
-                return
-            }
-
-            let mealArray = DataTable.Treatment(
-                units: units,
-                type: .carbs,
-                date: (deleteTwice ? (meals.createdAt ?? Date()) : meals.actualDate) ?? Date(),
-                id: meals.id ?? "",
-                isFPU: deleteTwice ? true : false,
-                fpuID: deleteTwice ? (meals.fpuID ?? "") : ""
-            )
-
-            if deleteTwice {
-                nsManager.deleteNormalCarbs(mealArray)
-                nsManager.deleteFPUs(mealArray)
-            } else {
-                nsManager.deleteNormalCarbs(mealArray)
-            }
+        func delete(meal: FetchedResults<Meals>) {
+            guard let meals = meal.first else { return }
+            carbsStorage.deleteCarbsAndFPUs(at: meals.createdAt ?? .distantPast)
         }
 
-        func carbsView(fetch: Bool, hasFatOrProtein: Bool, mealSummary: FetchedResults<Meals>) -> Bool {
+        func carbsView(fetch: Bool, hasFatOrProtein _: Bool, mealSummary _: FetchedResults<Meals>) -> Bool {
             var keepForNextWiew = false
             if fetch {
                 keepForNextWiew = true
-                backToCarbsView(complexEntry: hasFatOrProtein, mealSummary, override: false, deleteNothing: false, editMode: true)
+                backToCarbsView(override: false, editMode: true)
             } else {
-                backToCarbsView(complexEntry: false, mealSummary, override: true, deleteNothing: true, editMode: false)
+                backToCarbsView(override: true, editMode: false)
             }
             return keepForNextWiew
         }
@@ -347,6 +356,50 @@ extension Bolus {
         private func roundBolus(_ amount: Decimal) -> Decimal {
             // Account for increments (don't use the APSManager function as that gets too slow)
             Decimal(round(Double(amount / bolusIncrement))) * bolusIncrement
+        }
+
+        func setupBolusData() {
+            if let recent = coreDataStorage.recentMeal() {
+                carbToStore = [CarbsEntry(
+                    id: recent.id,
+                    createdAt: (recent.createdAt ?? Date.now).addingTimeInterval(5.seconds.timeInterval),
+                    actualDate: recent.actualDate,
+                    carbs: Decimal(recent.carbs),
+                    fat: Decimal(recent.fat),
+                    protein: Decimal(recent.protein),
+                    note: recent.note,
+                    enteredBy: CarbsEntry.manual,
+                    isFPU: false
+                )]
+
+                if let passForward = carbToStore.first {
+                    apsManager.temporaryData = TemporaryData(forBolusView: passForward)
+                    apsManager.determineBasal()
+                        .receive(on: DispatchQueue.main)
+                        .sink { [weak self] ok in
+                            guard let self = self else { return }
+                            if !ok {
+                                self.waitForSuggestion = false
+                                self.waitForCarbs = false
+                                self.insulinRequired = 0
+                                self.insulinRecommended = 0
+                            }
+
+                            if let notNilSugguestion = provider.suggestion {
+                                suggestion = notNilSugguestion
+                                if let notNilPredictions = suggestion?.predictions {
+                                    predictions = notNilPredictions
+                                }
+                            }
+
+                        }.store(in: &lifetime)
+                    loopDate = apsManager.lastLoopDate
+                }
+            }
+        }
+
+        private var empty: Bool {
+            (carbToStore.first?.carbs ?? 0) == 0 && (carbToStore.first?.fat ?? 0) == 0 && (carbToStore.first?.protein ?? 0) == 0
         }
     }
 }
