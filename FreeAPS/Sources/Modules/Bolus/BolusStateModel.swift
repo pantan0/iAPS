@@ -8,8 +8,10 @@ extension Bolus {
         @Injected() var unlockmanager: UnlockManager!
         @Injected() var apsManager: APSManager!
         @Injected() var broadcaster: Broadcaster!
+        @Injected() var pumpHistoryStorage: PumpHistoryStorage!
         // added for bolus calculator
         @Injected() var settings: SettingsManager!
+        @Injected() var nsManager: NightscoutManager!
         @Injected() var announcementStorage: AnnouncementsStorage!
         @Injected() var carbsStorage: CarbsStorage!
 
@@ -22,7 +24,7 @@ extension Bolus {
         @Published var percentage: Decimal = 0
         @Published var threshold: Decimal = 0
         @Published var maxBolus: Decimal = 0
-        @Published var errorString: String = ""
+        @Published var errorString: Decimal = 0
         @Published var evBG: Decimal = 0
         @Published var insulin: Decimal = 0
         @Published var isf: Decimal = 0
@@ -38,12 +40,11 @@ extension Bolus {
 
         // added for bolus calculator
         @Published var recentGlucose: BloodGlucose?
-        @Published var target: Decimal = 100
+        @Published var target: Decimal = 0
         @Published var cob: Decimal = 0
         @Published var iob: Decimal = 0
 
         @Published var currentBG: Decimal = 0
-        @Published var manualGlucose: Decimal = 0
         @Published var fifteenMinInsulin: Decimal = 0
         @Published var deltaBG: Decimal = 0
         @Published var targetDifferenceInsulin: Decimal = 0
@@ -73,7 +74,6 @@ extension Bolus {
         @Published var now = Date.now
         @Published var bolus: Decimal = 0
         @Published var carbToStore = [CarbsEntry]()
-        @Published var history: [PumpHistoryEvent]?
 
         let loopReminder: CGFloat = 4
         let coreDataStorage = CoreDataStorage()
@@ -84,8 +84,6 @@ extension Bolus {
             formatter.maximumFractionDigits = 0
             return formatter
         }
-
-        private let processQueue = DispatchQueue(label: "setupBolusData.processQueue")
 
         override func subscribe() {
             broadcaster.register(SuggestionObserver.self, observer: self)
@@ -115,7 +113,9 @@ extension Bolus {
                                 self.waitForSuggestion = false
                                 self.insulinRequired = 0
                                 self.insulinRecommended = 0
-                            } else if let notNilSugguestion = provider.suggestion {
+                            }
+
+                            if let notNilSugguestion = provider.suggestion {
                                 suggestion = notNilSugguestion
                                 if let notNilPredictions = suggestion?.predictions {
                                     predictions = notNilPredictions
@@ -123,10 +123,10 @@ extension Bolus {
                             }
 
                         }.store(in: &lifetime)
-                    setupPumpData()
                     loopDate = apsManager.lastLoopDate
                 }
             }
+
             setupInsulinRequired()
         }
 
@@ -135,13 +135,10 @@ extension Bolus {
             guard let lastGlucose = glucose.first, glucose.count >= 4 else { return }
             deltaBG = Decimal(lastGlucose.glucose + glucose[1].glucose) / 2 -
                 (Decimal(glucose[3].glucose + glucose[2].glucose) / 2)
-
-            if currentBG == 0, (lastGlucose.date ?? .distantPast).timeIntervalSinceNow > -5.minutes.timeInterval {
-                currentBG = Decimal(lastGlucose.glucose)
-            }
         }
 
         func calculateInsulin() -> Decimal {
+            let conversion: Decimal = units == .mmolL ? 0.0555 : 1
             // The actual glucose threshold
             threshold = max(target - 0.5 * (target - 40 * conversion), threshold * conversion)
 
@@ -151,9 +148,6 @@ extension Bolus {
                     // Use Oref0 predictions{
                     insulin = (evBG - target) / isf
                 } else { insulin = 0 }
-            } else if currentBG == 0, manualGlucose > 0 {
-                let targetDifference = manualGlucose * conversion - target
-                targetDifferenceInsulin = isf == 0 ? 0 : targetDifference / isf
             } else {
                 let targetDifference = currentBG - target
                 targetDifferenceInsulin = isf == 0 ? 0 : targetDifference / isf
@@ -163,21 +157,23 @@ extension Bolus {
             fifteenMinInsulin = isf == 0 ? 0 : (deltaBG * conversion) / isf
 
             // determine whole COB for which we want to dose insulin for and then determine insulin for wholeCOB
-            // If failed recent suggestion use recent carb entry
-            wholeCobInsulin = carbRatio != 0 ? max(cob, recentCarbs) / carbRatio : 0
+            wholeCobInsulin = carbRatio != 0 ? max(cob, temporaryCarbs) / carbRatio : 0
 
             // determine how much the calculator reduces/ increases the bolus because of IOB
-            // If failed recent suggestion use recent IOB value
-            iobInsulinReduction = (-1) * max(iob, recentIOB)
+            iobInsulinReduction = (-1) * iob
 
             // adding everything together
             // add a calc for the case that no fifteenMinInsulin is available
             if deltaBG != 0 {
                 wholeCalc = (targetDifferenceInsulin + iobInsulinReduction + wholeCobInsulin + fifteenMinInsulin)
-            } else if currentBG == 0, manualGlucose == 0 {
-                wholeCalc = (iobInsulinReduction + wholeCobInsulin)
             } else {
-                wholeCalc = (targetDifferenceInsulin + iobInsulinReduction + wholeCobInsulin)
+                // add (rare) case that no glucose value is available -> maybe display warning?
+                // if no bg is available, ?? sets its value to 0
+                if currentBG == 0 {
+                    wholeCalc = (iobInsulinReduction + wholeCobInsulin)
+                } else {
+                    wholeCalc = (targetDifferenceInsulin + iobInsulinReduction + wholeCobInsulin)
+                }
             }
 
             // apply custom factor at the end of the calculations
@@ -196,51 +192,30 @@ extension Bolus {
                 return 0
             }
 
-            // Account for increments (Don't use the apsManager function as that is much too slow)
+            // Account for increments (Don't use the apsManager function as that gets much too slow)
             insulinCalculated = roundBolus(insulinCalculated)
             // 0 up to maxBolus
             insulinCalculated = min(max(insulinCalculated, 0), maxBolus)
 
             prepareData()
+
             return insulinCalculated
         }
 
-        /// When COB module fail
-        var recentCarbs: Decimal {
+        var temporaryCarbs: Decimal {
             var temporaryCarbs: Decimal = 0
-            guard let temporary = carbToStore.first else { return 0 }
-            let timeDifference = (temporary.actualDate ?? .distantPast).timeIntervalSinceNow
+            let temporary = carbToStore.first
+            let timeDifference = (temporary?.actualDate ?? .distantPast).timeIntervalSinceNow
             if timeDifference <= 0, timeDifference > -15.minutes.timeInterval {
-                temporaryCarbs = temporary.carbs
+                temporaryCarbs = temporary?.carbs ?? 0
             }
             return temporaryCarbs
-        }
-
-        /// When IOB module fail
-        var recentIOB: Decimal {
-            guard iob == 0 else { return 0 }
-            guard let recent = coreDataStorage.recentReason() else { return 0 }
-            let timeDifference = (recent.date ?? .distantPast).timeIntervalSinceNow
-            if timeDifference <= 0, timeDifference > -30.minutes.timeInterval {
-                return ((recent.iob ?? 0) as Decimal)
-            } else if let history = history {
-                let total = history
-                    .filter({ $0.timestamp.timeIntervalSinceNow > -90.minutes.timeInterval && $0.type == .bolus })
-                    .compactMap(\.amount).reduce(0, +)
-                return max(total, 0)
-            }
-            return 0
-        }
-
-        func setupPumpData() {
-            DispatchQueue.main.async {
-                self.history = self.provider.pumpHistory()
-            }
         }
 
         func add() {
             guard amount > 0 else {
                 showModal(for: nil)
+                save()
                 return
             }
 
@@ -257,8 +232,12 @@ extension Bolus {
         }
 
         func save() {
-            guard !empty else { return }
+            guard !empty else {
+                print("No Meal to save")
+                return
+            }
             carbsStorage.storeCarbs(carbToStore)
+            print("Meal saved; carbs: \(carbToStore.first?.carbs ?? 0)")
         }
 
         func setupInsulinRequired() {
@@ -291,6 +270,11 @@ extension Bolus {
 
         func backToCarbsView(override: Bool, editMode: Bool) {
             showModal(for: .addCarbs(editMode: editMode, override: override))
+        }
+
+        func delete(meal: FetchedResults<Meals>) {
+            guard let meals = meal.first else { return }
+            carbsStorage.deleteCarbsAndFPUs(at: meals.createdAt ?? .distantPast)
         }
 
         func carbsView(fetch: Bool, hasFatOrProtein _: Bool, mealSummary _: FetchedResults<Meals>) -> Bool {
@@ -339,10 +323,6 @@ extension Bolus {
             let defaults = UserDefaults.standard
             defaults.set(true, forKey: IAPSconfig.inBolusView)
             // print("Active: YES") // For testing
-        }
-
-        var conversion: Decimal {
-            units == .mmolL ? 0.0555 : 1
         }
 
         private func prepareData() {
@@ -403,7 +383,9 @@ extension Bolus {
                                 self.waitForCarbs = false
                                 self.insulinRequired = 0
                                 self.insulinRecommended = 0
-                            } else if let notNilSugguestion = provider.suggestion {
+                            }
+
+                            if let notNilSugguestion = provider.suggestion {
                                 suggestion = notNilSugguestion
                                 if let notNilPredictions = suggestion?.predictions {
                                     predictions = notNilPredictions
@@ -411,7 +393,6 @@ extension Bolus {
                             }
 
                         }.store(in: &lifetime)
-                    setupPumpData()
                     loopDate = apsManager.lastLoopDate
                 }
             }

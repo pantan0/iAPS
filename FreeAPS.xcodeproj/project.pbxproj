@@ -64,7 +64,6 @@
 		198FA7BA2D380790006858FD /* ChartModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198FA7B92D380790006858FD /* ChartModel.swift */; };
 		198FEED52D3F8C5900A67FAE /* LiveActivityChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198FEED32D3E93CC00A67FAE /* LiveActivityChart.swift */; };
 		198FEED62D3F8C7900A67FAE /* LiveActivityChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198FEED32D3E93CC00A67FAE /* LiveActivityChart.swift */; };
-		1990DC532D6C1DDE00C4D967 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19DA487F29CD2B8400EEA1E7 /* Assets.xcassets */; };
 		1994DBE02C696A410076FCF1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 19DA487F29CD2B8400EEA1E7 /* Assets.xcassets */; };
 		1994DBE12C696FA10076FCF1 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 198377D4266BFFF6004DE65E /* Localizable.strings */; };
 		199561C1275E61A50077B976 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 199561C0275E61A50077B976 /* HealthKit.framework */; };
@@ -2958,7 +2957,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1990DC532D6C1DDE00C4D967 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3219,7 +3217,6 @@
 				38AAF8712600C1B0004AF583 /* MainChartView.swift in Sources */,
 				195F00482B5C267D00DAC71A /* DescriptionView.swift in Sources */,
 				19DC677F29CA675700FD9EC4 /* OverrideProfilesDataFlow.swift in Sources */,
-				F2159A522BA60F7A00A0B716 /* FontWeight.swift in Sources */,
 				1935364028496F7D001E0B16 /* Dynamic structs.swift in Sources */,
 				F2159A522BA60F7A00A0B716 /* FontWeight.swift in Sources */,
 				CE2FAD3A297D93F0001A872C /* BloodGlucoseExtensions.swift in Sources */,

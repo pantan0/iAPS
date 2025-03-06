@@ -109,7 +109,7 @@ extension Home {
             maxBolusValue: 1,
             useInsulinBars: true,
             screenHours: 6,
-            fpus: true
+            fpus: false
         )
 
         override func subscribe() {

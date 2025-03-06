@@ -22,7 +22,7 @@ extension StatConfig {
         @Published var extendHomeView: Bool = true
         @Published var displayExpiration: Bool = false
         @Published var anubis: Bool = false
-        @Published var fpus: Bool = true
+        @Published var fpus: Bool = false
 
         var units: GlucoseUnits = .mmolL
 

@@ -216,14 +216,14 @@ extension Home {
 
                 ZStack {
                     HStack {
-                        Text("⇢").font(.statusFont).foregroundStyle(.mint)
+                        Text("⇢").font(.statusFont).foregroundStyle(.secondary)
 
                         if let eventualBG = state.eventualBG {
                             Text(
                                 fetchedTargetFormatter.string(
                                     from: (state.data.units == .mmolL ? eventualBG.asMmolL : Decimal(eventualBG)) as NSNumber
                                 ) ?? ""
-                            ).font(.statusFont).foregroundColor(colorScheme == .dark ? .mint : .black)
+                            ).font(.statusFont).foregroundColor(colorScheme == .dark ? .white : .black)
                         } else {
                             Text("?").font(.statusFont).foregroundStyle(.secondary)
                         }
@@ -327,8 +327,6 @@ extension Home {
                             }
                         }
                         .onLongPressGesture {
-                            let impactSoft = UIImpactFeedbackGenerator(style: .soft)
-                            impactSoft.impactOccurred()
                             state.showModal(for: .overrideProfilesConfig)
                         }
                         if state.useTargetButton {
@@ -592,21 +590,17 @@ extension Home {
                     }.frame(width: 250, height: 25).font(.bolusProgressBarFont)
                     HStack(alignment: .bottom, spacing: 5) {
                         ProgressView(value: Double(progress)).progressViewStyle(BolusProgressViewStyle())
-                            .overlay {
-                                Image(systemName: "pause.fill")
-                                    .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.white, .blue)
-                                    .font(.bolusProgressStopFont)
-                            }
+
+                        Image(systemName: "xmark.square.fill")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .blue)
+                            .font(.bolusProgressStopFont)
+                            .offset(y: 2)
+                            .onTapGesture { state.cancelBolus() }
                     }
-                        .onTapGesture { 
-                            let successFeedback = UINotificationFeedbackGenerator()
-                            successFeedback.notificationOccurred(.success)
-                            state.cancelBolus() 
-                        }
                 }
                 .dynamicTypeSize(...DynamicTypeSize.large)
-                .padding(.bottom, 8)
+                .padding(.vertical, 20)
             }
         }
 
@@ -776,7 +770,7 @@ extension Home {
                                 }
 
                                 // IOB Chart
-                                if !state.iobData.isEmpty {
+                                if state.iobs > 0 {
                                     activeIOBView
                                 }
 

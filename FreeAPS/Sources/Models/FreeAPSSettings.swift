@@ -77,7 +77,7 @@ struct FreeAPSSettings: JSON, Equatable {
     var displayExpiration = false
     var sensorDays: Double = 10
     var anubis: Bool = false
-    var fpus: Bool = true
+    var fpus: Bool = false
     // Auto ISF
     var autoisf: Bool = false
     var smbDeliveryRatioBGrange: Decimal = 0

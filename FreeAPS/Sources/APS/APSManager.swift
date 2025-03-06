@@ -23,7 +23,6 @@ protocol APSManager {
     var isManualTempBasal: Bool { get }
     var bolusAmount: CurrentValueSubject<Decimal?, Never> { get }
     var temporaryData: TemporaryData { get set }
-    var concentration: (concentration: Double, increment: Double) { get }
     func enactTempBasal(rate: Double, duration: TimeInterval)
     func makeProfiles() -> AnyPublisher<Bool, Never>
     func determineBasal() -> AnyPublisher<Bool, Never>
@@ -379,11 +378,42 @@ final class BaseAPSManager: APSManager, Injectable {
         let temp = currentTemp(date: now)
         let temporary = temporaryData
         temporaryData.forBolusView.carbs = 0
+        print("For Bolus View \(temporary.forBolusView.carbs)")
 
-        let mainPublisher = makeProfiles()
-            .flatMap { _ in self.autosens() }
-            .flatMap { _ in self.dailyAutotune() }
-            .flatMap { _ in self.openAPS.determineBasal(currentTemp: temp, clock: now, temporary: temporary) }
+        let mainPublisher = Just("Start")
+            .flatMap { _ in
+                let startTime = Date.now
+                return self.makeProfiles().handleEvents(receiveCompletion: { _ in
+                    print(
+                        "APSManager: Time for makeProfiles \(-1 * startTime.timeIntervalSinceNow) seconds, total: \(-1 * start.timeIntervalSinceNow)"
+                    )
+                })
+            }
+            .flatMap { _ in
+                let startTime = Date.now
+                return self.autosens().handleEvents(receiveCompletion: { _ in
+                    print(
+                        "APSManager: Time for autosens \(-1 * startTime.timeIntervalSinceNow) seconds, total: \(-1 * start.timeIntervalSinceNow)"
+                    )
+                })
+            }
+            .flatMap { _ in
+                let startTime = Date.now
+                return self.dailyAutotune().handleEvents(receiveCompletion: { _ in
+                    print(
+                        "APSManager: Time for dailyAutotune \(-1 * startTime.timeIntervalSinceNow) seconds, total: \(-1 * start.timeIntervalSinceNow)"
+                    )
+                })
+            }
+            .flatMap { _ in
+                let startTime = Date.now
+                return self.openAPS.determineBasal(currentTemp: temp, clock: now, temporary: temporary)
+                    .handleEvents(receiveCompletion: { _ in
+                        print(
+                            "APSManager: Time for determineBasal \(-1 * startTime.timeIntervalSinceNow) seconds, total: \(-1 * start.timeIntervalSinceNow)"
+                        )
+                    })
+            }
             .map { suggestion -> Bool in
                 if let suggestion = suggestion {
                     DispatchQueue.main.async {
@@ -516,7 +546,6 @@ final class BaseAPSManager: APSManager, Injectable {
         debug(.apsManager, "Enact temp basal \(rate) - \(duration)")
 
         let roundedAmout = pump.roundToSupportedBasalRate(unitsPerHour: rate)
-        let adjusted = pump.roundToSupportedBasalRate(unitsPerHour: rate * concentration.concentration)
         pump.enactTempBasal(unitsPerHour: roundedAmout, for: duration) { error in
             if let error = error {
                 debug(.apsManager, "Temp Basal failed with error: \(error.localizedDescription)")
@@ -525,7 +554,7 @@ final class BaseAPSManager: APSManager, Injectable {
                 debug(.apsManager, "Temp Basal succeeded")
                 let temp = TempBasal(
                     duration: Int(duration / 60),
-                    rate: Decimal(adjusted),
+                    rate: Decimal(rate * self.concentration.concentration),
                     temp: .absolute,
                     timestamp: Date()
                 )
@@ -742,14 +771,6 @@ final class BaseAPSManager: APSManager, Injectable {
         }
     }
 
-    private func adjustForConcentration(_ rate: Decimal) -> Decimal {
-        guard rate > 0 else { return rate }
-        let setting = concentration
-        guard setting.concentration != 1 else { return rate }
-
-        return (rate * Decimal(setting.concentration)).roundBolus(increment: setting.increment)
-    }
-
     private func currentTemp(date: Date) -> TempBasal {
         let defaultTemp = { () -> TempBasal in
             guard let temp = storage.retrieve(OpenAPS.Monitor.tempBasal, as: TempBasal.self) else {
@@ -765,7 +786,7 @@ final class BaseAPSManager: APSManager, Injectable {
         case .active:
             return TempBasal(duration: 0, rate: 0, temp: .absolute, timestamp: date)
         case let .tempBasal(dose):
-            let rate = adjustForConcentration(Decimal(dose.unitsPerHour))
+            let rate = Decimal(dose.unitsPerHour)
             let durationMin = max(0, Int((dose.endDate.timeIntervalSince1970 - date.timeIntervalSince1970) / 60))
             return TempBasal(duration: durationMin, rate: rate, temp: .absolute, timestamp: date)
         default:
