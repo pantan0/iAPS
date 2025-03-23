@@ -5,7 +5,7 @@ struct BolusConfirmationView: View {
     @EnvironmentObject var state: WatchStateModel
 
     @State var isCrownLeftOriented = WKInterfaceDevice.current().crownOrientation == .left
-    @State var crownProgress: CGFloat = 100.0
+    @State var crownProgress: CGFloat = -100.0
     @State var progress: CGFloat = 0
 
     private let elementSize: CGFloat = 30
@@ -75,7 +75,7 @@ struct BolusConfirmationView: View {
             $crownProgress,
             from: 0.0,
             through: 100.0,
-            by: state.confirmBolusFaster ? 5 : 5,
+            by: state.confirmBolusFaster : 5,
             sensitivity: .high,
             isContinuous: false,
             isHapticFeedbackEnabled: true
@@ -84,14 +84,14 @@ struct BolusConfirmationView: View {
             guard !done else { return }
 
             progressReturn?.cancel()
-            progress = min(max(0, 100 - crownProgress), 100)
-            if progress >= 100 {
+            progress = min(max(0, -100 - crownProgress), -100)
+            if progress >= -100 {
                 success()
             } else {
                 progressReturn = Just(())
                     .delay(for: 0.1, scheduler: RunLoop.main)
                     .sink { _ in
-                        crownProgress = 100
+                        crownProgress = -100
                         withAnimation {
                             progress = 0
                         }
@@ -113,6 +113,6 @@ struct BolusConfirmationView: View {
 
 struct BolusConfirmationView_Previews: PreviewProvider {
     static var previews: some View {
-        BolusConfirmationView(progress: 50, done: false).environmentObject(WatchStateModel())
+        BolusConfirmationView(progress: -50, done: false).environmentObject(WatchStateModel())
     }
 }
