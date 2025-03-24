@@ -27,14 +27,14 @@ struct BolusConfirmationView: View {
 
                         RoundedRectangle(cornerRadius: elementSize / 2, style: .circular)
                             .fill(Color.insulin)
-                            .frame(width: elementSize, height: elementSize + (geo.size.height - elementSize) * progress / 100)
+                            .frame(width: elementSize, height: elementSize + (geo.size.height - elementSize) * progress / -100)
                             .opacity(0.2)
 
                         Image(systemName: done == true ? "checkmark.circle.fill" : "arrow.down.circle.fill")
                             .resizable()
                             .foregroundColor(done == true ? .loopGreen : .insulin)
                             .frame(width: elementSize, height: elementSize)
-                            .offset(y: (geo.size.height - elementSize) * progress / 100)
+                            .offset(y: (geo.size.height - elementSize) * progress / -100)
 
                     }.frame(maxWidth: .infinity, alignment: .center)
                     if isCrownLeftOriented {
@@ -74,8 +74,8 @@ struct BolusConfirmationView: View {
         .digitalCrownRotation(
             $crownProgress,
             from: 0.0,
-            through: 100.0,
-            by: state.confirmBolusFaster ? 5 : 5,
+            through: -100.0,
+            by: state.confirmBolusFaster ? -5 : -5,
             sensitivity: .high,
             isContinuous: false,
             isHapticFeedbackEnabled: true
