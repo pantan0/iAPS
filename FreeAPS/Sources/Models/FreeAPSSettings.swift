@@ -57,6 +57,11 @@ struct FreeAPSSettings: JSON, Equatable {
     var useTargetButton: Bool = false
     var alwaysUseColors: Bool = false
     var timeSettings: Bool = true
+    var hypoSound: String = "New/Anticipalte.caf"
+    var hyperSound: String = "New/Anticipalte.caf"
+    var ascending: String = "New/Anticipalte.caf"
+    var descending: String = "New/Anticipalte.caf"
+    var carbSound: String = "New/Anticipalte.caf"
     var profilesOrTempTargets: Bool = false
     var allowBolusShortcut: Bool = false
     var allowedRemoteBolusAmount: Decimal = 0.0
@@ -79,6 +84,8 @@ struct FreeAPSSettings: JSON, Equatable {
     var anubis: Bool = false
     var fpus: Bool = true
     var fpuAmounts: Bool = false
+    var carbButton: Bool = true
+    var profileButton: Bool = true
     // Auto ISF
     var autoisf: Bool = false
     var smbDeliveryRatioBGrange: Decimal = 0
@@ -251,6 +258,14 @@ extension FreeAPSSettings: Decodable {
             settings.useAlarmSound = useAlarmSound
         }
 
+        if let carbButton = try? container.decode(Bool.self, forKey: .carbButton) {
+            settings.carbButton = carbButton
+        }
+
+        if let profileButton = try? container.decode(Bool.self, forKey: .profileButton) {
+            settings.profileButton = profileButton
+        }
+
         if let addSourceInfoToGlucoseNotifications = try? container.decode(
             Bool.self,
             forKey: .addSourceInfoToGlucoseNotifications
@@ -364,6 +379,26 @@ extension FreeAPSSettings: Decodable {
 
         if let timeSettings = try? container.decode(Bool.self, forKey: .timeSettings) {
             settings.timeSettings = timeSettings
+        }
+
+        if let hypoSound = try? container.decode(String.self, forKey: .hypoSound) {
+            settings.hypoSound = hypoSound
+        }
+
+        if let hyperSound = try? container.decode(String.self, forKey: .hyperSound) {
+            settings.hyperSound = hyperSound
+        }
+
+        if let ascending = try? container.decode(String.self, forKey: .ascending) {
+            settings.ascending = ascending
+        }
+
+        if let descending = try? container.decode(String.self, forKey: .descending) {
+            settings.descending = descending
+        }
+
+        if let carbSound = try? container.decode(String.self, forKey: .carbSound) {
+            settings.carbSound = carbSound
         }
 
         if let profilesOrTempTargets = try? container.decode(Bool.self, forKey: .profilesOrTempTargets) {
