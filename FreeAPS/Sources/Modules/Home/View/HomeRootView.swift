@@ -265,25 +265,27 @@ extension Home {
                 VStack {
                     Divider()
                     HStack {
-                        Button { state.showModal(for: .addCarbs(editMode: false, override: false)) }
-                        label: {
-                            ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
-                                Image(systemName: "fork.knife")
-                                    .renderingMode(.template)
-                                    .font(.custom("Buttons", size: 24))
-                                    .foregroundColor(colorScheme == .dark ? .loopYellow : .orange)
-                                    .padding(8)
-                                    .foregroundColor(.loopYellow)
-                                if let carbsReq = state.carbsRequired {
-                                    Text(numberFormatter.string(from: carbsReq as NSNumber)!)
-                                        .font(.caption)
-                                        .foregroundColor(.white)
-                                        .padding(4)
-                                        .background(Capsule().fill(Color.red))
+                        if state.carbButton {
+                            Button { state.showModal(for: .addCarbs(editMode: false, override: false)) }
+                            label: {
+                                ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
+                                    Image(systemName: "fork.knife")
+                                        .renderingMode(.template)
+                                        .font(.custom("Buttons", size: 24))
+                                        .foregroundColor(colorScheme == .dark ? .loopYellow : .orange)
+                                        .padding(8)
+                                        .foregroundColor(.loopYellow)
+                                    if let carbsReq = state.carbsRequired {
+                                        Text(numberFormatter.string(from: carbsReq as NSNumber)!)
+                                            .font(.caption)
+                                            .foregroundColor(.white)
+                                            .padding(4)
+                                            .background(Capsule().fill(Color.red))
+                                    }
                                 }
-                            }
-                        }.buttonStyle(.borderless)
-                        Spacer()
+                            }.buttonStyle(.borderless)
+                            Spacer()
+                        }
                         Button {
                             (state.bolusProgress != nil) ? showBolusActiveAlert = true :
                                 state.showModal(for: .bolus(
@@ -310,29 +312,31 @@ extension Home {
                             .foregroundColor(.insulin)
                             Spacer()
                         }
-                        ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
-                            Image(systemName: isOverride ? "person.fill" : "person")
-                                .symbolRenderingMode(.palette)
-                                .font(.custom("Buttons", size: 28))
-                                .foregroundStyle(.purple)
-                                .padding(8)
-                                .background(isOverride ? .purple.opacity(0.15) : .clear)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                        .onTapGesture {
-                            if isOverride {
-                                showCancelAlert.toggle()
-                            } else {
+                        if state.profileButton {
+                            ZStack(alignment: Alignment(horizontal: .trailing, vertical: .bottom)) {
+                                Image(systemName: isOverride ? "person.fill" : "person")
+                                    .symbolRenderingMode(.palette)
+                                    .font(.custom("Buttons", size: 28))
+                                    .foregroundStyle(.purple)
+                                    .padding(8)
+                                    .background(isOverride ? .purple.opacity(0.15) : .clear)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .onTapGesture {
+                                if isOverride {
+                                    showCancelAlert.toggle()
+                                } else {
+                                    state.showModal(for: .overrideProfilesConfig)
+                                }
+                            }
+                            .onLongPressGesture {
+                                let impactSoft = UIImpactFeedbackGenerator(style: .soft)
+                                impactSoft.impactOccurred()
                                 state.showModal(for: .overrideProfilesConfig)
                             }
-                        }
-                        .onLongPressGesture {
-                            let impactSoft = UIImpactFeedbackGenerator(style: .soft)
-                            impactSoft.impactOccurred()
-                            state.showModal(for: .overrideProfilesConfig)
+                            Spacer()
                         }
                         if state.useTargetButton {
-                            Spacer()
                             Image(systemName: "target")
                                 .renderingMode(.template)
                                 .font(.custom("Buttons", size: 24))
@@ -350,8 +354,8 @@ extension Home {
                                 .onLongPressGesture {
                                     state.showModal(for: .addTempTarget)
                                 }
+                            Spacer()
                         }
-                        Spacer()
                         Button { state.showModal(for: .settings) }
                         label: {
                             Image(systemName: "gear")
@@ -361,7 +365,7 @@ extension Home {
                         .buttonStyle(.borderless)
                         .foregroundColor(.gray)
                     }
-                    .padding(.horizontal, state.allowManualTemp ? 5 : 24)
+                    .padding(.horizontal, state.allowManualTemp ? 10 : 24)
                     .padding(.bottom, geo.safeAreaInsets.bottom)
                 }
             }
