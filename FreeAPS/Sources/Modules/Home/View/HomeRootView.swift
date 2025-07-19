@@ -20,13 +20,14 @@ extension Home {
         @State var animateTIR = Date.distantPast
         @State var showBolusActiveAlert = false
         @State var displayAutoHistory = false
+        @State var displayDynamicHistory = false
 
         let buttonFont = Font.custom("TimeButtonFont", size: 14)
         let viewPadding: CGFloat = 5
 
         @Environment(\.managedObjectContext) var moc
-        @Environment(\.colorScheme) var colorScheme
         @Environment(\.sizeCategory) private var fontSize
+        @Environment(\.colorScheme) var colorScheme
 
         @FetchRequest(
             entity: Override.entity(),
@@ -108,8 +109,8 @@ extension Home {
                 highGlucose: $state.data.highGlucose,
                 alwaysUseColors: $state.alwaysUseColors,
                 displayDelta: $state.displayDelta,
-                scrolling: $displayGlucose,
-                displayExpiration: $state.displayExpiration, cgm: $state.cgm, sensordays: $state.sensorDays, anubis: $state.anubis
+                scrolling: $displayGlucose, displaySAGE: $state.displaySAGE,
+                displayExpiration: $state.displayExpiration, cgm: $state.cgm, sensordays: $state.sensorDays
             )
             .onTapGesture {
                 if state.alarm == nil {
@@ -417,7 +418,7 @@ extension Home {
                         materialOpacity: materialOpacity
                     )
                     .frame(width: 12, height: 38)
-                    .offset(x: 0, y: -5)
+                    .offset(y: -5)
                     HStack(spacing: 0) {
                         if let loop = state.data.suggestion, let cob = loop.cob {
                             Text(numberFormatter.string(from: cob as NSNumber) ?? "0")
@@ -427,7 +428,7 @@ extension Home {
                             Text("?").font(.statusFont).bold()
                         }
                         Text(NSLocalizedString(" g", comment: "gram of carbs")).font(.statusFont).foregroundStyle(.secondary)
-                    }.offset(x: 0, y: 5)
+                    }.offset(y: 5)
                 }
                 // Instead of Spacer
                 Text(" ")
@@ -445,7 +446,7 @@ extension Home {
                         materialOpacity: materialOpacity
                     )
                     .frame(width: 12, height: 38)
-                    .offset(x: 0, y: -5)
+                    .offset(y: -5)
                     HStack(spacing: 0) {
                         if let loop = state.data.suggestion, let iob = loop.iob {
                             Text(
@@ -455,17 +456,20 @@ extension Home {
                             Text("?").font(.statusFont).bold()
                         }
                         Text(NSLocalizedString(" U", comment: "Insulin unit")).font(.statusFont).foregroundStyle(.secondary)
-                    }.offset(x: 0, y: 5)
+                    }.offset(y: 5)
                 }
-            }
-            .offset(y: 5)
+            }.offset(x: 5, y: 5)
         }
 
         var preview: some View {
             addBackground()
                 .frame(minHeight: 200)
                 .overlay {
-                    PreviewChart(readings: $state.readings, lowLimit: $state.data.lowGlucose, highLimit: $state.data.highGlucose)
+                    PreviewChart(
+                        readings: $state.readings,
+                        lowLimit: $state.data.lowGlucose,
+                        highLimit: $state.data.highGlucose
+                    )
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 15))
                 .addShadows()
@@ -625,8 +629,8 @@ extension Home {
                     VStack {
                         ZStack {
                             if !displayGlucose {
-                                glucoseView.frame(maxHeight: .infinity, alignment: .center).offset(y: -10)
-                                loopView.frame(maxWidth: .infinity, alignment: .leading).offset(x: 40, y: -30)
+                                glucoseView.frame(maxHeight: .infinity, alignment: .center).offset(y: -5)
+                                loopView.frame(maxWidth: .infinity, alignment: .leading).offset(x: 40, y: -25)
                             }
                             if displayGlucose {
                                 glucoseView.frame(maxHeight: .infinity, alignment: .center).offset(y: -10)
@@ -651,8 +655,8 @@ extension Home {
                         }
 
                         Divider()
-
-                    }.padding(.top, geo.safeAreaInsets.top)
+                    }
+                    .padding(.top, geo.safeAreaInsets.top)
                 }
         }
 
@@ -696,20 +700,23 @@ extension Home {
         }
 
         var timeSetting: some View {
-            let string = "\(state.hours) " + NSLocalizedString("hours", comment: "") + "   "
-            return Menu(string) {
-                Button("3 " + NSLocalizedString("hours", comment: ""), action: { state.hours = 3 })
-                Button("6 " + NSLocalizedString("hours", comment: ""), action: { state.hours = 6 })
-                Button("9 " + NSLocalizedString("hours", comment: ""), action: { state.hours = 9 })
-                Button("12 " + NSLocalizedString("hours", comment: ""), action: { state.hours = 12 })
-                Button("24 " + NSLocalizedString("hours", comment: ""), action: { state.hours = 24 })
-                Button("UI/UX Settings", action: { state.showModal(for: .statisticsConfig) })
+            let hourLabel = NSLocalizedString("\(state.hours) hours", comment: "") + "   "
+
+            return Menu(hourLabel) {
+                ForEach([3, 6, 9, 12, 24], id: \.self) { value in
+                    let label = NSLocalizedString("\(value) hours", comment: "")
+                    Button(label, action: { state.hours = value })
+                }
+
+                Button("UI/UX Settings", action: {
+                    state.showModal(for: .statisticsConfig)
+                })
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.primary)
             .font(.timeSettingFont)
             .padding(.vertical, 15)
-            .background(TimeEllipse(characters: string.count))
+            .background(TimeEllipse(characters: hourLabel.count))
         }
 
         private var isfView: some View {
@@ -723,6 +730,8 @@ extension Home {
                 .onTapGesture {
                     if state.autoisf {
                         displayAutoHistory.toggle()
+                    } else {
+                        displayDynamicHistory.toggle()
                     }
                 }
             }.offset(x: 130)
@@ -783,8 +792,8 @@ extension Home {
                                 if !state.iobData.isEmpty {
                                     activeIOBView
                                 }
-
-                            }.background {
+                            }
+                            .background {
                                 // Track vertical scroll
                                 GeometryReader { proxy in
                                     let scrollPosition = proxy.frame(in: .named("HomeScrollView")).minY
@@ -806,8 +815,7 @@ extension Home {
                         buttonPanel(geo)
                     }
                     .background(
-                        colorScheme == .light ? .gray.opacity(IAPSconfig.backgroundOpacity * 2) : .white
-                            .opacity(IAPSconfig.backgroundOpacity * 2)
+                        colorScheme == .light ? IAPSconfig.homeViewBackgroundLight : IAPSconfig.homeViewBackgrundDark
                     )
                     .ignoresSafeArea(edges: .vertical)
                     .overlay {
@@ -836,6 +844,11 @@ extension Home {
             .ignoresSafeArea(.keyboard)
             .sheet(isPresented: $displayAutoHistory) {
                 AutoISFHistoryView(units: state.data.units)
+                    .environment(\.colorScheme, colorScheme)
+            }
+            .sheet(isPresented: $displayDynamicHistory) {
+                DynamicHistoryView(units: state.data.units)
+                    .environment(\.colorScheme, colorScheme)
             }
             .popup(isPresented: state.isStatusPopupPresented, alignment: .bottom, direction: .bottom) {
                 popup

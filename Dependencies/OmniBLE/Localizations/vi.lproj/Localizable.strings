@@ -138,13 +138,13 @@
 "days" = "ngày";
 
 /* Unit for singular hour in pod life remaining */
-"hour" = "giờ";
+"hour" = "hours";
 
 /* Unit for plural hours in pod life remaining */
 "hours" = "giờ";
 
 /* Unit for singular minute in pod life remaining */
-"minute" = "phút";
+"minute" = "minute";
 
 /* Unit for plural minutes in pod life remaining */
 "minutes" = "phút";
@@ -496,7 +496,7 @@
 "Continue" = "Tiếp tục";
 
 /* */
-"Attach Pod" = "Attach Pod";
+"Attach Pod" = "Gắn Pod";
 
 /* Alert title for confirm pod attachment */
 "Confirm Pod Attachment" = "Xác nhận pod đã gắn chặt";

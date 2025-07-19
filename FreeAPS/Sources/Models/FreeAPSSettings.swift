@@ -57,13 +57,22 @@ struct FreeAPSSettings: JSON, Equatable {
     var useTargetButton: Bool = false
     var alwaysUseColors: Bool = false
     var timeSettings: Bool = true
-    var hypoSound: String = "New/Anticipalte.caf"
-    var hyperSound: String = "New/Anticipalte.caf"
-    var ascending: String = "New/Anticipalte.caf"
-    var descending: String = "New/Anticipalte.caf"
-    var carbSound: String = "New/Anticipalte.caf"
-    var bolusFailure = "Silent"
+    var disable15MinTrend: Bool = false
+    // Sounds
+    var hypoSound: String = "Default"
+    var hyperSound: String = "Default"
+    var ascending: String = "Default"
+    var descending: String = "Default"
+    var carbSound: String = "Default"
+    var bolusFailure: String = "Silent"
     var missingLoops = true
+    // Alerts
+    var lowAlert: Bool = true
+    var highAlert: Bool = true
+    var ascendingAlert: Bool = true
+    var descendingAlert: Bool = true
+    var carbsRequiredAlert: Bool = true
+    //
     var profilesOrTempTargets: Bool = false
     var allowBolusShortcut: Bool = false
     var allowedRemoteBolusAmount: Decimal = 0.0
@@ -82,12 +91,18 @@ struct FreeAPSSettings: JSON, Equatable {
     var extended_overrides = false
     var extendHomeView = true
     var displayExpiration = false
+    var displaySAGE = true
     var sensorDays: Double = 10
-    var anubis: Bool = false
     var fpus: Bool = true
     var fpuAmounts: Bool = false
     var carbButton: Bool = true
     var profileButton: Bool = true
+    var glucoseOverrideThreshold: Decimal = 100
+    var glucoseOverrideThresholdActive: Bool = false
+    var glucoseOverrideThresholdActiveDown: Bool = false
+    var glucoseOverrideThresholdDown: Decimal = 100
+    // ColorScheme
+    var lightMode: LightMode = .auto
     // Auto ISF
     var autoisf: Bool = false
     var smbDeliveryRatioBGrange: Decimal = 0
@@ -216,10 +231,6 @@ extension FreeAPSSettings: Decodable {
             settings.useFPUconversion = useFPUconversion
         }
 
-        if let anubis = try? container.decode(Bool.self, forKey: .anubis) {
-            settings.anubis = anubis
-        }
-
         if let individualAdjustmentFactor = try? container.decode(Decimal.self, forKey: .individualAdjustmentFactor) {
             settings.individualAdjustmentFactor = individualAdjustmentFactor
         }
@@ -230,6 +241,30 @@ extension FreeAPSSettings: Decodable {
 
         if let fattyMeals = try? container.decode(Bool.self, forKey: .fattyMeals) {
             settings.fattyMeals = fattyMeals
+        }
+
+        if let lowAlert = try? container.decode(Bool.self, forKey: .lowAlert) {
+            settings.lowAlert = lowAlert
+        }
+
+        if let highAlert = try? container.decode(Bool.self, forKey: .highAlert) {
+            settings.highAlert = highAlert
+        }
+
+        if let ascendingAlert = try? container.decode(Bool.self, forKey: .ascendingAlert) {
+            settings.ascendingAlert = ascendingAlert
+        }
+
+        if let descendingAlert = try? container.decode(Bool.self, forKey: .descendingAlert) {
+            settings.descendingAlert = descendingAlert
+        }
+
+        if let carbsRequiredAlert = try? container.decode(Bool.self, forKey: .carbsRequiredAlert) {
+            settings.carbsRequiredAlert = carbsRequiredAlert
+        }
+
+        if let disable15MinTrend = try? container.decode(Bool.self, forKey: .disable15MinTrend) {
+            settings.disable15MinTrend = disable15MinTrend
         }
 
         if let fattyMealFactor = try? container.decode(Decimal.self, forKey: .fattyMealFactor) {
@@ -273,6 +308,10 @@ extension FreeAPSSettings: Decodable {
             forKey: .addSourceInfoToGlucoseNotifications
         ) {
             settings.addSourceInfoToGlucoseNotifications = addSourceInfoToGlucoseNotifications
+        }
+
+        if let lightMode = try? container.decode(LightMode.self, forKey: .lightMode) {
+            settings.lightMode = lightMode
         }
 
         if let lowGlucose = try? container.decode(Decimal.self, forKey: .lowGlucose) {
@@ -482,6 +521,10 @@ extension FreeAPSSettings: Decodable {
         if let displayExpiration = try? container.decode(Bool.self, forKey: .displayExpiration) {
             settings.displayExpiration = displayExpiration
         }
+
+        if let displaySAGE = try? container.decode(Bool.self, forKey: .displaySAGE) {
+            settings.displaySAGE = displaySAGE
+        }
         // AutoISF
         if let autoisf = try? container.decode(Bool.self, forKey: .autoisf) {
             settings.autoisf = autoisf
@@ -575,6 +618,24 @@ extension FreeAPSSettings: Decodable {
             settings.autoisf_min = autoisf_min
         }
 
+        if let glucoseOverrideThreshold = try? container.decode(Decimal.self, forKey: .glucoseOverrideThreshold) {
+            settings.glucoseOverrideThreshold = glucoseOverrideThreshold
+        }
+
+        if let glucoseOverrideThresholdActive = try? container.decode(Bool.self, forKey: .glucoseOverrideThresholdActive) {
+            settings.glucoseOverrideThresholdActive = glucoseOverrideThresholdActive
+        }
+
+        if let glucoseOverrideThresholdDown = try? container.decode(Decimal.self, forKey: .glucoseOverrideThresholdDown) {
+            settings.glucoseOverrideThresholdDown = glucoseOverrideThresholdDown
+        }
+
+        if let glucoseOverrideThresholdActiveDown = try? container
+            .decode(Bool.self, forKey: .glucoseOverrideThresholdActiveDown)
+        {
+            settings.glucoseOverrideThresholdActiveDown = glucoseOverrideThresholdActiveDown
+        }
+
         // Auto ISF Keto Protection
         if let ketoProtectBasalAbsolut = try? container.decode(Decimal.self, forKey: .ketoProtectBasalAbsolut) {
             settings.ketoProtectBasalAbsolut = ketoProtectBasalAbsolut
@@ -594,4 +655,12 @@ extension FreeAPSSettings: Decodable {
 
         self = settings
     }
+}
+
+enum LightMode: String, JSON, Identifiable, CaseIterable {
+    case light = "Light"
+    case dark = "Dark"
+    case auto = "Auto"
+
+    var id: LightMode { self }
 }

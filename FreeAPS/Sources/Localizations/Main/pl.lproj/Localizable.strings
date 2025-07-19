@@ -16,6 +16,15 @@
 /* Continue after added carbs without bolus */
 "Continue without bolus" = "Kontynuuj bez bolusa";
 
+/* History View */
+"No data." = "No data.";
+
+/* Bolus View */
+"No Predictions. Failed loop suggestion." = "No Predictions. Failed loop suggestion.";
+
+/* Bolus View */
+"New Glucose Missing" = "New Glucose Missing";
+
 /* Continue after added meal without bolus */
 "Save Meal without bolus" = "Save Meal without bolus";
 
@@ -190,6 +199,9 @@
 /*  */
 "Cancel Temp Target" = "Anuluj tymczasowy cel";
 
+/*  */
+"Cancel Temporary Target" = "Cancel Temporary Target";
+
 /* Custom temp target */
 "Custom" = "Dostosuj";
 
@@ -309,6 +321,9 @@
 
 /*  */
 "Schedule" = "Schedule";
+
+/* */
+"(standard units / hour)" = "(standard units / hour)";
 
 /*  */
 "starts at" = "starts at";
@@ -463,6 +478,9 @@ Połączono z Nightscout!";
 /* Add Omnipod pump */
 "Add Omnipod" = "Add Omnipod";
 
+/* Add Dana-i/RS pump */
+"Add Dana-i/RS" = "Add Dana-i/RS";
+
 /* Add Simulator pump */
 "Add Simulator" = "Add Simulator";
 
@@ -610,6 +628,9 @@ Połączono z Nightscout!";
 
 /* */
 "Display on Watch" = "Display on Watch";
+
+/* */
+"Display either Overrides or Temp Targets" = "Display either Overrides or Temp Targets";
 
 /* */
 "Garmin Watch" = "Garmin Watch";
@@ -999,7 +1020,7 @@ Połączono z Nightscout!";
 "Delete CGM" = "Delete CGM";
 
 /* */
-"Are you sure you want to remove this cgm from loop?" = "Are you sure you want to remove this cgm from loop?";
+"Are you sure you want to remove this cgm from iAPS?" = "Are you sure you want to remove this cgm from iAPS?";
 
 /* */
 "There is no undo" = "There is no undo";
@@ -1156,6 +1177,9 @@ Połączono z Nightscout!";
 /* Temp Basal Shortcut */
 "Temp basal Amount in U/h" = "Temp basal Amount in U/h";
 
+/* */
+"Cancel Temp" = "Cancel Temp";
+
 
 
 /* */
@@ -1184,6 +1208,12 @@ Połączono z Nightscout!";
 
 /* */
 "No Glucose Alarm active" = "No Glucose Alarm active";
+
+/* */
+"Ascending Glucose Alarm active" = "Ascending Glucose Alarm active";
+
+/* */
+"Descending Glucose Alarm active" = "Descending Glucose Alarm active";
 
 /* */
 "snoozing until %@" = "snoozing until %@";
@@ -1225,7 +1255,7 @@ Połączono z Nightscout!";
 "Backfill options" = "Backfill options";
 
 /* */
-"Backfilling from trend is currently not well supported by Loop" = "Backfilling from trend is currently not well supported by Loop";
+"Backfilling from trend is currently not well supported by iAPS" = "Backfilling from trend is currently not well supported by iAPS";
 
 /* */
 "Backfill from history" = "Backfill from history";
@@ -1275,6 +1305,9 @@ Połączono z Nightscout!";
 /* Option for no sound */
 "Silent" = "Silent";
 
+/* Option for default notification sound */
+"Default" = "Default";
+
 /* The iOS default sound */
 "iOS default sound" = "iOS default sound";
 
@@ -1283,6 +1316,21 @@ Połączono z Nightscout!";
 
 /* Alert for ascending glucose */
 "RAPIDLY ASCENDING GLUCOSE!" = "RAPIDLY ASCENDING GLUCOSE!";
+
+/* Sound for bolus failure */
+"Bolus Failure" = "Bolus Failure";
+
+/* Sound for missing loops */
+"Missing Loops" = "Missing Loops";
+
+/* Alert for ascending glucose */
+"Ascending" = "Ascending";
+
+/* Alert for descending glucose */
+"Descending" = "Descending";
+
+/* Thresholds for Alerts */
+"Thresholds" = "Thresholds";
 
 /* */
 "Carbs required: %d g" = "Carbs required: %d g";
@@ -1587,6 +1635,18 @@ Połączono z Nightscout!";
 /* */
 "End the Override with next Meal" = "End the Override with next Meal";
 
+/* */
+"End the Override when Glucose is Trending Up" = "End the Override when Glucose is Trending Up";
+
+/* */
+"And when Glucose is higher than" = "And when Glucose is higher than";
+
+/* */
+"End the Override when Glucose is Lower ..." = "End the Override when Glucose is Lower ...";
+
+/* */
+"... than" = "... than";
+
 /* Your normal Profile. Use a short string */
 "Normal Profile" = "Normal Profile";
 
@@ -1613,6 +1673,9 @@ Połączono z Nightscout!";
 
 /* */
 "Change CR" = "Change CR";
+
+/* */
+"Change Basal" = "Change Basal";
 
 /* */
 "SMB Minutes" = "SMB Minutes";
@@ -1737,6 +1800,9 @@ Połączono z Nightscout!";
 "Eventual Glucose" = "Eventual Glucose";
 
 /* */
+"Minimum Predicted Glucose" = "Minimum Predicted Glucose";
+
+/* */
 "Please wait" = "Please wait";
 
 /* */
@@ -1789,6 +1855,12 @@ Połączono z Nightscout!";
 
 /* Add insulin without bolusing alert */
 " without bolusing" = " without bolusing";
+
+/* */
+"Don't Use 15 min Trend" = "Don't Use 15 min Trend";
+
+/* */
+"Don't adjust for past 15 minutes glucose trend." = "Don't adjust for past 15 minutes glucose trend.";
 
 /* -------------------------------------------------------------------------------------------
   DASH strings
@@ -1873,7 +1945,7 @@ Połączono z Nightscout!";
 "%1$@ for %2$@" = "%1$@ for %2$@";
 
 /* Description text on manual temp basal action sheet */
-"Loop will not automatically adjust your insulin delivery until the temporary basal rate finishes or is canceled." = "Loop will not automatically adjust your insulin delivery until the temporary basal rate finishes or is canceled.";
+"iAPS will not automatically adjust your insulin delivery until the temporary basal rate finishes or is canceled." = "iAPS will not automatically adjust your insulin delivery until the temporary basal rate finishes or is canceled.";
 /* Button text for setting manual temporary basal rate*/
 "Set Temporary Basal" = "Set Temporary Basal";
 
@@ -1984,10 +2056,16 @@ Połączono z Nightscout!";
 "2 hours" = "2 hours";
 
 /* */
+"3 hours" = "3 hours";
+
+/* */
 "4 hours" = "4 hours";
 
 /* */
 "6 hours" = "6 hours";
+
+/* */
+"9 hours" = "9 hours";
 
 /* */
 "12 hours" = "12 hours";
@@ -2152,7 +2230,7 @@ Połączono z Nightscout!";
 "Share and Backup" = "Share and Backup";
 
 /* Section 1 title */
-"Upload settings and statistics" = "Upload settings and statistics";
+"Upload Settings and Statistics" = "Upload Settings and Statistics";
 
 /* On-off toggle */
 "Share and Backup all of your Settings and Statistics" = "Share and Backup all of your Settings and Statistics";
@@ -2518,7 +2596,7 @@ Połączono z Nightscout!";
 /* */
 "SMB Delivery Ratio BG Range" = "SMB Delivery Ratio BG Range";
 
-/* */
+/* SMB Delivery Ratio BG Range description */
 "Default value: 0, Sensible is between 40 mg/dL and 120 mg/dL. The linearly increasing SMB delivery ratio is mapped to the glucose range [target_bg, target_bg+bg_range]. At target_bg the SMB ratio is smb_delivery_ratio_min, at target_bg+bg_range it is smb_delivery_ratio_max. With 0 the linearly increasing SMB ratio is disabled and the fix smb_delivery_ratio is used." = "Default value: 0, Sensible is between 40 mg/dL and 120 mg/dL. The linearly increasing SMB delivery ratio is mapped to the glucose range [target_bg, target_bg+bg_range]. At target_bg the SMB ratio is smb_delivery_ratio_min, at target_bg+bg_range it is smb_delivery_ratio_max. With 0 the linearly increasing SMB ratio is disabled and the fix smb_delivery_ratio is used.";
 
 /* */
@@ -2569,7 +2647,7 @@ Połączono z Nightscout!";
 /* */
 "Max IOB Threshold Percent" = "Max IOB Threshold Percent";
 
-/* Description */
+/* IOB Threshold Percent Description */
 "Percentage of the max IOB setting to use for SMBs while Auto ISF is enabled.\n\nWhile current IOB is below the threshold, the SMB amount can exceed the threshold by 30%, however never the max IOB setting.\n\nAt 100% this setting is disabled." = "Percentage of the max IOB setting to use for SMBs while Auto ISF is enabled.\n\nWhile current IOB is below the threshold, the SMB amount can exceed the threshold by 30%, however never the max IOB setting.\n\nAt 100% this setting is disabled.";
 
 /* */
@@ -2779,7 +2857,7 @@ Połączono z Nightscout!";
 "Remaining Carbs Cap" = "Remaining Carbs Cap";
 
 /* "Remaining Carbs Cap" */
-"This is the amount of the maximum number of carbs we’ll assume will absorb over 4h if we don’t yet see carb absorption." = "This is the amount of the maximum number of carbs we’ll assume will absorb over 4h if we don’t yet see carb absorption.";
+"This is the amount of the maximum number of carbs we’ll assume will absorb over 4h if we don’t yet see carb absorption. Maximum 90" = "This is the amount of the maximum number of carbs we’ll assume will absorb over 4h if we don’t yet see carb absorption. Maximum 90";
 
 /* Headline ”Max SMB Basal Minutes" */
 "Max SMB Basal Minutes" = "Max SMB Basal Minutes";
@@ -2945,6 +3023,9 @@ Połączono z Nightscout!";
 /* Settings Section */
 "Extra Features" = "Extra Features";
 
+/* Header */
+"UI/UX Settings" = "UI/UX Settings";
+
 /* UI/UX option */
 "Display Predictions" = "Display Predictions";
 
@@ -3032,7 +3113,22 @@ Połączono z Nightscout!";
 "Display Ratio and a History View button" = "Display Ratio and a History View button";
 
 /* UI/UX option */
-"Auto ISF Home View" = "Auto ISF Home View";
+"Home View Ratio Button" = "Home View Ratio Button";
+
+/* UI/UX option */
+"Light" = "Light";
+
+/* UI/UX option */
+"Dark" = "Dark";
+
+/* UI/UX option */
+"Auto" = "Automatyczny";
+
+/* UI/UX option */
+"Color Scheme" = "Color Scheme";
+
+/* UI/UX option */
+"Light / Dark Mode" = "Light / Dark Mode";
 
 /* Setting title */
 "Bolus Calculator" = "Bolus Calculator";
@@ -3108,3 +3204,6 @@ Połączono z Nightscout!";
 
 /* Apple Watch Overrides */
 "Cancel Override" = "Cancel Override";
+
+/* Headline "To enable settings, go to the App Config section in iOS Settings App" */
+"To enable settings, go to the App Config section in iOS Settings App" = "To enable settings, go to the App Config section in iOS Settings App";

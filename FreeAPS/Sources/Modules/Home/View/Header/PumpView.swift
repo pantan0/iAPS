@@ -92,10 +92,10 @@ struct PumpView: View {
                 }
                 remainingTime(time: date.timeIntervalSince(timerDate))
                     .font(.pumpFont)
-                    .offset(x: -5, y: 0)
+                    .offset(x: -5)
             } else if state.pumpName.contains("Omni") {
                 Text("No Pod").font(.statusFont).foregroundStyle(.secondary)
-                    .offset(x: 0, y: -4)
+                    .offset(y: -4)
             }
             // Other pumps
             else if let reservoir = reservoir {
@@ -110,7 +110,7 @@ struct PumpView: View {
                             if let timeZone = timeZone, timeZone.secondsFromGMT() != TimeZone.current.secondsFromGMT() {
                                 ClockOffset(mdtPump: true)
                             }
-                        }.offset(x: 0, y: expiresAtDate == nil ? -4 : 0)
+                        }.offset(y: expiresAtDate == nil ? -4 : 0)
                 } else {
                     HStack(spacing: 0) {
                         Text(
@@ -130,7 +130,7 @@ struct PumpView: View {
                 }
             } else {
                 Text("No Pump").font(.statusFont).foregroundStyle(.secondary)
-                    .offset(x: 0, y: -4)
+                    .offset(y: -4)
             }
 
             // MDT and Dana
@@ -143,10 +143,10 @@ struct PumpView: View {
                     .rotationEffect(.degrees(-90))
                     .frame(maxWidth: 32, maxHeight: 12)
                     .foregroundColor(batteryColor)
-                    .offset(y: -0.5)
+                    .offset(x: -5, y: -0.5)
             }
         }
-        .offset(x: 0, y: 5)
+        .offset(y: 5)
     }
 
     private func remainingTime(time: TimeInterval) -> some View {
@@ -235,7 +235,8 @@ struct PumpView: View {
 
     private func podInsulinAmount(portion: Double) -> some View {
         ZStack {
-            UIImage(imageLiteralResourceName: "pod_reservoir")
+            let pump = colorScheme == .dark ? "pod_dark" : "pod_light"
+            UIImage(imageLiteralResourceName: pump)
                 .fillImageUpToPortion(color: .insulin.opacity(0.8), portion: portion)
                 .resizable()
                 .aspectRatio(0.72, contentMode: .fit)
@@ -257,7 +258,8 @@ struct PumpView: View {
 
     private func pumpInsulinAmount(portion: Double) -> some View {
         ZStack {
-            UIImage(imageLiteralResourceName: "NonOmniPump")
+            let pump = colorScheme == .dark ? "pump_dark" : "pump_light"
+            UIImage(imageLiteralResourceName: pump)
                 .fillImageUpToPortion(color: .insulin.opacity(0.8), portion: max(portion, 0.3))
                 .resizable()
                 .frame(maxWidth: 17, maxHeight: 36)

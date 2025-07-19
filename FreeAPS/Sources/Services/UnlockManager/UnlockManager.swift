@@ -14,6 +14,7 @@ final class BaseUnlockManager: UnlockManager {
         Future { promise in
             let context = LAContext()
             var error: NSError?
+            var defaultOn = true
 
             let handler: (Bool, Error?) -> Void = { success, error in
                 if success {
