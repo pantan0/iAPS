@@ -164,7 +164,6 @@ extension Home {
                 impactHeavy.impactOccurred()
                 state.runLoop()
             }
-            .offset(y: 10)
         }
 
         var tempBasalString: String {
@@ -435,7 +434,7 @@ extension Home {
 
                 // Insulin on Board
                 HStack {
-                    let substance = Double(state.data.suggestion?.iob ?? 0)
+                    let substance = Double(state.data.iob ?? 0)
                     let max = max(Double(state.maxIOB), 1)
                     let fraction: Double = 1 - abs(substance) / max
                     let fill = CGFloat(min(Swift.max(fraction, 0.05), 1))
@@ -448,7 +447,7 @@ extension Home {
                     .frame(width: 12, height: 38)
                     .offset(y: -5)
                     HStack(spacing: 0) {
-                        if let loop = state.data.suggestion, let iob = loop.iob {
+                        if let iob = state.data.iob {
                             Text(
                                 targetFormatter.string(from: iob as NSNumber) ?? "0"
                             ).font(.statusFont).bold()
@@ -630,7 +629,14 @@ extension Home {
                         ZStack {
                             if !displayGlucose {
                                 glucoseView.frame(maxHeight: .infinity, alignment: .center).offset(y: -5)
-                                loopView.frame(maxWidth: .infinity, alignment: .leading).offset(x: 40, y: -25)
+                                loopView
+                                    .frame(
+                                        maxWidth: .infinity,
+                                        maxHeight: .infinity,
+                                        alignment: .topLeading
+                                    )
+                                    .padding(20)
+                                    .offset(x: 5, y: -10)
                             }
                             if displayGlucose {
                                 glucoseView.frame(maxHeight: .infinity, alignment: .center).offset(y: -10)
@@ -770,13 +776,9 @@ extension Home {
                             VStack {
                                 // Main Chart
                                 chart
-                                // Adjust hours visible (X-Axis) and optional ratio display
-                                if state.extended {
-                                    timeSetting
-                                        .overlay { isfView }
-                                } else {
-                                    timeSetting
-                                }
+                                // Adjust hours visible (X-Axis) and ratio display
+                                timeSetting
+                                    .overlay { isfView }
                                 // TIR Chart
                                 if !state.data.glucose.isEmpty {
                                     preview.padding(.top, 15)
@@ -784,6 +786,7 @@ extension Home {
                                 // Loops Chart
                                 loopPreview.padding(.vertical, 15)
 
+                                // COB Chart
                                 if state.carbData > 0 {
                                     activeCOBView
                                 }
