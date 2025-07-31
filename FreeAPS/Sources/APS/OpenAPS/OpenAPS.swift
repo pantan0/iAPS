@@ -88,6 +88,12 @@ final class OpenAPS {
 
                     self.storage.save(meal, as: Monitor.meal)
                     self.storage.save(iob, as: Monitor.iob)
+
+                    if let iobEntries = IOBTick0.parseArrayFromJSON(from: iob) {
+                        let cd = CoreDataStorage()
+                        cd.saveInsulinData(iobEntries: iobEntries)
+                    }
+
                     print(
                         "Time for Meal and IOB module \(-1 * now.timeIntervalSinceNow) seconds, total: \(-1 * start.timeIntervalSinceNow)"
                     )
@@ -1045,6 +1051,25 @@ final class OpenAPS {
             pumphistory,
             profile,
             clock,
+            autosens
+        ])
+    }
+
+    func iobSync() async -> RawJSON {
+        let (
+            autosens,
+            profile,
+            pumpHistory
+        ) = await (
+            autosensHistory(),
+            profileHistory(),
+            pumpHistory()
+        )
+
+        return await scriptExecutor.call(name: OpenAPS.Prepare.iob, with: [
+            pumpHistory,
+            profile,
+            Date(),
             autosens
         ])
     }
