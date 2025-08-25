@@ -57,7 +57,7 @@ struct LiveActivityChart: View {
         }
         .privacySensitive()
         .padding(0)
-        .background(Color.black.opacity(0.6))
+        .background(Color.primary.opacity(0.1))
         .activityBackgroundTint(Color.clear)
     }
 
