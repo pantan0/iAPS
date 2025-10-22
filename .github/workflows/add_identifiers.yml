@@ -11,7 +11,11 @@ jobs:
 
   identifiers:
     needs: validate
+<<<<<<< Updated upstream
     runs-on: macos-15
+=======
+    runs-on: macos-latest
+>>>>>>> Stashed changes
     steps:
       
       # Checks-out the repo
