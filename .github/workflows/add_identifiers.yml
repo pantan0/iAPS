@@ -11,7 +11,7 @@ jobs:
 
   identifiers:
     needs: validate
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       
       # Checks-out the repo
