@@ -4,10 +4,10 @@ import Foundation
 import JavaScriptCore
 
 final class OpenAPS {
-    private let jsWorker = JavaScriptWorker()
     private let scriptExecutor: WebViewScriptExecutor
     private let processQueue = DispatchQueue(label: "OpenAPS.processQueue", qos: .utility)
     private let storage: FileStorage
+    private let glucoseStorage: GlucoseStorage
     private let nightscout: NightscoutManager
     private let pumpStorage: PumpHistoryStorage
 
@@ -15,11 +15,13 @@ final class OpenAPS {
 
     init(
         storage: FileStorage,
+        glucoseStorage: GlucoseStorage,
         nightscout: NightscoutManager,
         pumpStorage: PumpHistoryStorage,
         scriptExecutor: WebViewScriptExecutor
     ) {
         self.storage = storage
+        self.glucoseStorage = glucoseStorage
         self.nightscout = nightscout
         self.pumpStorage = pumpStorage
         self.scriptExecutor = scriptExecutor
@@ -194,7 +196,7 @@ final class OpenAPS {
                 debug(.openAPS, "Start autosens")
                 let pumpHistory = self.loadFileFromStorage(name: OpenAPS.Monitor.pumpHistory)
                 let carbs = self.loadFileFromStorage(name: Monitor.carbHistory)
-                let glucose = self.loadFileFromStorage(name: Monitor.glucose)
+                let glucose = self.glucoseStorage.retrieveFiltered()
                 let profile = self.loadFileFromStorage(name: Settings.profile)
                 let basalProfile = self.loadFileFromStorage(name: Settings.basalProfile)
                 let tempTargets = self.loadFileFromStorage(name: Settings.tempTargets)
@@ -227,7 +229,7 @@ final class OpenAPS {
             self.processQueue.async {
                 debug(.openAPS, "Start autotune")
                 let pumpHistory = self.loadFileFromStorage(name: OpenAPS.Monitor.pumpHistory)
-                let glucose = self.loadFileFromStorage(name: Monitor.glucose)
+                let glucose = self.glucoseStorage.retrieveFiltered()
                 let profile = self.loadFileFromStorage(name: Settings.profile)
                 let pumpProfile = self.loadFileFromStorage(name: Settings.pumpProfile)
                 let carbs = self.loadFileFromStorage(name: Monitor.carbHistory)
@@ -320,7 +322,7 @@ final class OpenAPS {
 
                     now = Date.now
                     let (pumpProfile, profile) = await (
-                        self.makeProfileAsync(
+                        self.makeProfile(
                             preferences: preferences,
                             pumpSettings: pumpSettings,
                             bgTargets: bgTargets,
@@ -334,7 +336,7 @@ final class OpenAPS {
                             dynamicVariables: dynamicVariables,
                             settings: settings
                         ),
-                        self.makeProfileAsync(
+                        self.makeProfile(
                             preferences: preferences,
                             pumpSettings: pumpSettings,
                             bgTargets: bgTargets,
@@ -382,8 +384,9 @@ final class OpenAPS {
         await loadFileFromStorageAsync(name: Monitor.carbHistory)
     }
 
-    private func glucoseHistory() async -> RawJSON {
-        await loadFileFromStorageAsync(name: Monitor.glucose)
+    private func glucoseHistory() async -> [BloodGlucose] {
+        // TODO: not async
+        glucoseStorage.retrieveFiltered()
     }
 
     private func preferencesHistory() async -> RawJSON {
@@ -817,14 +820,13 @@ final class OpenAPS {
         return tdd
     }
 
-    func dynamicVariables(_ preferences: Preferences?, _ settingsData: FreeAPSSettings?) async -> DynamicVariables {
+    func dynamicVariables(_ preferences: Preferences?, _: FreeAPSSettings?) async -> DynamicVariables {
         coredataContext.performAndWait {
             let start = Date.now
             var hbt_ = preferences?.halfBasalExerciseTarget ?? 160
             let wp = preferences?.weightPercentage ?? 1
             let smbMinutes = (preferences?.maxSMBBasalMinutes ?? 30) as NSDecimalNumber
             let uamMinutes = (preferences?.maxUAMSMBBasalMinutes ?? 30) as NSDecimalNumber
-            let disableCGMError = settingsData?.disableCGMError ?? true
 
             let cd = CoreDataStorage()
             let os = OverrideStorage()
@@ -1067,7 +1069,6 @@ final class OpenAPS {
                 uamMinutes: (overrideArray.first?.uamMinutes ?? uamMinutes) as Decimal,
                 maxIOB: maxIOB as Decimal,
                 overrideMaxIOB: overrideMaxIOB,
-                disableCGMError: disableCGMError,
                 preset: name,
                 autoISFoverrides: autoISFsettings,
                 aisfOverridden: useOverride && (overrideArray.first?.overrideAutoISF ?? false)
@@ -1216,17 +1217,6 @@ final class OpenAPS {
         )
     }
 
-    private func exportDefaultPreferences() -> RawJSON {
-        // dispatchPrecondition(condition: .onQueue(processQueue))
-
-        jsWorker.inCommonContext { worker in
-            worker.evaluate(script: Script(name: Prepare.log))
-            worker.evaluate(script: Script(name: Bundle.profile))
-            worker.evaluate(script: Script(name: Prepare.profile))
-            return worker.call(function: Function.exportDefaults, with: [])
-        }
-    }
-
     private func makeProfile(
         preferences: JSON,
         pumpSettings: JSON,
@@ -1239,40 +1229,6 @@ final class OpenAPS {
         autotune: JSON,
         freeaps: JSON,
         dynamicVariables: DynamicVariables,
-        settings: JSON
-    ) async -> RawJSON {
-        // dispatchPrecondition(condition: .onQueue(processQueue))
-        await scriptExecutor.call(
-            name: OpenAPS.Prepare.profile,
-            with: [
-                pumpSettings,
-                bgTargets,
-                isf,
-                basalProfile,
-                preferences,
-                carbRatio,
-                tempTargets,
-                model,
-                autotune,
-                freeaps,
-                dynamicVariables,
-                settings
-            ]
-        )
-    }
-
-    private func makeProfileAsync(
-        preferences: JSON,
-        pumpSettings: JSON,
-        bgTargets: JSON,
-        basalProfile: JSON,
-        isf: JSON,
-        carbRatio: JSON,
-        tempTargets: JSON,
-        model: JSON,
-        autotune: JSON,
-        freeaps: JSON,
-        dynamicVariables: JSON,
         settings: JSON
     ) async -> RawJSON {
         // dispatchPrecondition(condition: .onQueue(processQueue))

@@ -7,7 +7,7 @@ import Swinject
 extension NotificationsConfig {
     struct RootView: BaseView {
         let resolver: Resolver
-        @StateObject var state = StateModel()
+        @StateObject var state: StateModel
         @State private var currentSoundID: SystemSoundID = 1336
         @State private var isPlay = false
         @State private var currentName: String = ""
@@ -36,19 +36,21 @@ extension NotificationsConfig {
             return formatter
         }
 
+        init(resolver: Resolver) {
+            self.resolver = resolver
+            _state = StateObject(wrappedValue: StateModel(resolver: resolver))
+        }
+
         private func liveActivityFooterText() -> String {
-            var footer =
-                "Live activity displays blood glucose live on the lock screen and on the dynamic island (if available)"
+            let footer = "Live activity displays blood glucose live on the lock screen and on the dynamic island (if available)"
 
-            if !systemLiveActivitySetting {
-                footer =
-                    NSLocalizedString(
-                        "Live activities are turned OFF in system settings. To enable live activities, go to Settings app -> iAPS -> Turn live Activities ON.\n\n",
-                        comment: "footer"
-                    ) + NSLocalizedString(footer, comment: "Footer")
+            guard systemLiveActivitySetting else {
+                return NSLocalizedString(
+                    "Live activities are turned OFF in system settings. To enable live activities, go to Settings app -> iAPS -> Turn live Activities ON.\n\n",
+                    comment: "footer"
+                ) + NSLocalizedString(footer, comment: "Footer")
             }
-
-            return footer
+            return NSLocalizedString(footer, comment: "Footer")
         }
 
         private func playSound(_ s: String? = nil, _ sStop: SystemSoundID? = nil, _ onCompletion: @escaping () -> Void) {
@@ -208,7 +210,6 @@ extension NotificationsConfig {
                 })
             }
             .dynamicTypeSize(...DynamicTypeSize.xxLarge)
-            .onAppear(perform: configureView)
             .navigationBarTitle("Notifications")
             .navigationBarTitleDisplayMode(.automatic)
         }

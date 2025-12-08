@@ -5,7 +5,7 @@ import Swinject
 extension DataTable {
     struct RootView: BaseView {
         let resolver: Resolver
-        @StateObject var state = StateModel()
+        @StateObject var state: StateModel
         @Environment(\.colorScheme) var colorScheme
 
         @State private var isRemoveHistoryItemAlertPresented: Bool = false
@@ -72,6 +72,11 @@ extension DataTable {
             return formatter
         }
 
+        init(resolver: Resolver) {
+            self.resolver = resolver
+            _state = StateObject(wrappedValue: StateModel(resolver: resolver))
+        }
+
         var body: some View {
             VStack {
                 Picker("Mode", selection: $state.mode) {
@@ -90,8 +95,8 @@ extension DataTable {
                     }
                 }
             }
+            .background(Color(.systemBackground))
             .dynamicTypeSize(...DynamicTypeSize.large)
-            .onAppear(perform: configureView)
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(trailing: Button("Close", action: state.hideModal))
@@ -217,7 +222,6 @@ extension DataTable {
                         }
                     }
                 }
-                .onAppear(perform: configureView)
                 .navigationTitle("Add Glucose")
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarItems(trailing: Button("Close", action: { showManualGlucose = false }))
@@ -414,7 +418,6 @@ extension DataTable {
                         )
                     }
                 }
-                .onAppear(perform: configureView)
                 .navigationTitle("External Insulin")
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationBarItems(trailing: Button("Close", action: { showExternalInsulin = false
