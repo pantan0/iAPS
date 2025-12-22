@@ -26,6 +26,7 @@ extension AddCarbs {
         @Published var presetToEdit: Presets?
         @Published var edit = false
         @Published var ai = false
+        @Published var skipSave = false
 
         @Published var combinedPresets: [(preset: Presets?, portions: Double)] = []
 
@@ -41,6 +42,7 @@ extension AddCarbs {
             skipBolus = settingsManager.settings.skipBolusScreenAfterCarbs
             useFPUconversion = settingsManager.settings.useFPUconversion
             ai = settingsManager.settings.ai
+            skipSave = settingsManager.settings.skipSave
         }
 
         func add(_ continue_: Bool, fetch: Bool) {
@@ -129,7 +131,7 @@ extension AddCarbs {
                     .reduce(0, +)
                 let totProtein = combinedPresets
                     .compactMap({ each in (each.preset?.protein ?? 0) as Decimal * Decimal(each.portions) }).reduce(0, +)
-                let margins: Decimal = 0.2
+                let margins: Decimal = 1.8
 
                 if carbs > totCarbs + margins {
                     presetsString.append("+ \(carbs - totCarbs) carbs")
