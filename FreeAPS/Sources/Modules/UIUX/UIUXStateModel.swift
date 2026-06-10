@@ -31,7 +31,7 @@ extension UIUX {
         @Published var hidePredictions: Bool = false
         @Published var useCarbBars: Bool = false
         @Published var ai: Bool = true
-        @Published var skipSave: Bool = false
+        @Published var mealViewMicronutrients: Bool = true
 
         var units: GlucoseUnits = .mmolL
 
@@ -64,7 +64,7 @@ extension UIUX {
             subscribeSetting(\.hidePredictions, on: $hidePredictions) { hidePredictions = $0 }
             subscribeSetting(\.useCarbBars, on: $useCarbBars) { useCarbBars = $0 }
             subscribeSetting(\.ai, on: $ai) { ai = $0 }
-            subscribeSetting(\.skipSave, on: $skipSave) { skipSave = $0 }
+            subscribeSetting(\.mealViewMicronutrients, on: $mealViewMicronutrients) { mealViewMicronutrients = $0 }
 
             subscribeSetting(\.low, on: $low, initial: {
                 let value = max(min($0, 90), 40)

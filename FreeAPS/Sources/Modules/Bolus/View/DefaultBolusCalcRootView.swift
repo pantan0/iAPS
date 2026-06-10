@@ -259,11 +259,24 @@ extension Bolus {
         }
 
         var changed: Bool {
-            ((meal.first?.carbs ?? 0) > 0) || ((meal.first?.fat ?? 0) > 0) || ((meal.first?.protein ?? 0) > 0)
+            !unchanged
+        }
+
+        private var unchanged: Bool {
+            guard let meal = meal.first else { return true }
+
+            let hasMicros = (meal.micronutrient as? Set<Micronutrient>)?.contains { ($0.amount?.decimalValue ?? 0) > 0 } ?? false
+
+            return (meal.carbs?.decimalValue ?? 0) <= 0 &&
+                (meal.fat?.decimalValue ?? 0) <= 0 &&
+                (meal.protein?.decimalValue ?? 0) <= 0 &&
+                (meal.fiber?.decimalValue ?? 0) <= 0 &&
+                !hasMicros
         }
 
         var hasFatOrProtein: Bool {
-            ((meal.first?.fat ?? 0) > 0) || ((meal.first?.protein ?? 0) > 0)
+            guard let meal = meal.first else { return false }
+            return ((meal.fat ?? 0) != 0) || ((meal.protein ?? 0) != 0)
         }
 
         func carbsView() {
@@ -336,8 +349,11 @@ extension Bolus {
                             if state.fraction != 1, state.insulin > 0 {
                                 Divider()
                                 HStack {
-                                    Text((entries.last?.variable ?? "") + " " + (entries.last?.value ?? "") + "  ->")
-                                        .foregroundStyle(.secondary)
+                                    if let recent = entries.last {
+                                        Text("\(recent.variable) \(recent.value)  ->")
+                                            .foregroundStyle(.secondary)
+                                    }
+
                                     Text(
                                         state.insulinCalculated.formatted() + unit
                                     ).fontWeight(fontWeight).font(.title3).foregroundStyle(.blue).bold()

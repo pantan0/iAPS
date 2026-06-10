@@ -1093,7 +1093,7 @@ Enact a temp Basal or a temp target */
 "Additional notification types" = "Yderligere notifikationstyper";
 
 /* */
-"Misc" = "Diverse";
+"Miscellaneous" = "Miscellaneous";
 
 /* */
 "Unit override" = "Enhed tilsidesætte";
@@ -1389,6 +1389,37 @@ Enact a temp Basal or a temp target */
 
 "Today's Meals" = "Today's Meals";
 
+"Micronutrient" = "Micronutrient";
+
+"Micronutrients" = "Micronutrients";
+
+"Vitamin A" = "Vitamin A";
+"Vitamin B1 (Thiamine)" = "Vitamin B1 (Thiamine)";
+"Vitamin B2 (Riboflavin)" = "Vitamin B2 (Riboflavin)";
+"Vitamin B3 (Niacin)" = "Vitamin B3 (Niacin)";
+"Vitamin B5 (Pantothenic Acid)" = "Vitamin B5 (Pantothenic Acid)";
+"Vitamin B6" = "Vitamin B6";
+"Vitamin B7 (Biotin)" = "Vitamin B7 (Biotin)";
+"Vitamin B9 (Folate)" = "Vitamin B9 (Folate)";
+"Vitamin B12" = "Vitamin B12";
+"Vitamin C" = "Vitamin C";
+"Vitamin D" = "Vitamin D";
+"Vitamin E" = "Vitamin E";
+"Vitamin K" = "Vitamin K";
+"Calcium" = "Calcium";
+"Iron" = "Iron";
+"Magnesium" = "Magnesium";
+"Potassium" = "Potassium";
+"Zinc" = "Zinc";
+"Phosphorus" = "Phosphorus";
+"Copper" = "Copper";
+"Manganese" = "Manganese";
+"Selenium" = "Selenium";
+"Iodine" = "Iodine";
+"Salt" = "Salt";
+
+"Allow Meal View Micronutrients and Dietary Fibers entries" = "Allow Meal View Micronutrients and Dietary Fibers entries";
+
 // --------- AI ---------
 /* */
 
@@ -1412,9 +1443,21 @@ Enact a temp Basal or a temp target */
 
 "Serving Size" = "Serving Size";
 
+"Standard Serving" = "Standard Serving";
+
 "Food Name" = "Food Name";
 
 "Food" = "Food";
+
+"Tag name" = "Tag name";
+
+"Add New Tag" = "Add New Tag";
+
+"Tags" = "Tags";
+
+"Show All Nutrients" = "Show All Nutrients";
+
+"Calories" = "Calories";
 
 "Quick access to your frequently used foods" = "Quick access to your frequently used foods";
 
@@ -1480,27 +1523,7 @@ Enact a temp Basal or a temp target */
 
 "**Text/Voice Search:**" = "**Text/Voice Search:**";
 
-"• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods. Default for text and barcode searches." = "• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods. Default for text and barcode searches.";
-
-"• **OpenAI (ChatGPT API)**: Most accurate AI analysis using GPT-4 Vision. Requires API key (~$0.01 per image). Excellent at image analysis and natural language queries." = "• **OpenAI (ChatGPT API)**: Most accurate AI analysis using GPT-4 Vision. Requires API key (~$0.01 per image). Excellent at image analysis and natural language queries.";
-
-"• **Google (Gemini API)**: Free AI with generous limits (1500/day). Excellent food recognition using Google's Vision AI. Perfect balance of quality and cost." = "• **Google (Gemini API)**: Free AI with generous limits (1500/day). Excellent food recognition using Google's Vision AI. Perfect balance of quality and cost.";
-
-"• **Anthropic (Claude API)**: Advanced AI with detailed reasoning. Excellent at food analysis and portion estimation. Requires API key (~$0.25 per million tokens)." = "• **Anthropic (Claude API)**: Advanced AI with detailed reasoning. Excellent at food analysis and portion estimation. Requires API key (~$0.25 per million tokens).";
-
-"Available Search Providers:" = "Available Search Providers:";
-
-"Provider Information" = "Provider Information";
-
-"✅ Select 'Anthropic (Claude API)', 'Google (Gemini API)', or 'OpenAI (ChatGPT API)' for AI Image Analysis to use your paid keys" = "✅ Select 'Anthropic (Claude API)', 'Google (Gemini API)', or 'OpenAI (ChatGPT API)' for AI Image Analysis to use your paid keys";
-
-"When you take a photo of food, the app uses the provider selected in 'AI Image Analysis' above." = "When you take a photo of food, the app uses the provider selected in 'AI Image Analysis' above.";
-
-"Camera Food Analysis" = "Camera Food Analysis";
-
-"To use your paid API keys, make sure to select the corresponding provider in 'AI Image Analysis' above. The provider you select for AI Image Analysis is what will be used when you take photos of food." = "To use your paid API keys, make sure to select the corresponding provider in 'AI Image Analysis' above. The provider you select for AI Image Analysis is what will be used when you take photos of food.";
-
-"Important: How to Use Your API Keys" = "Important: How to Use Your API Keys";
+"• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods." = "• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods.";
 
 "AI Progress Animation" = "AI Progress Animation";
 
@@ -1554,7 +1577,7 @@ Enact a temp Basal or a temp target */
 
 "ChatGPT (OpenAI) API Key" = "ChatGPT (OpenAI) API Key";
 
-"Get an API key from platform.openai.com. Customize the analysis prompt to get specific meal component breakdowns and nutrition totals. (~$0.01 per image)" = "Get an API key from platform.openai.com. Customize the analysis prompt to get specific meal component breakdowns and nutrition totals. (~$0.01 per image)";
+"Get an API key at platform.openai.com." = "Get an API key at platform.openai.com.";
 
 "OpenAI (ChatGPT API) Configuration" = "OpenAI (ChatGPT API) Configuration";
 
@@ -1562,19 +1585,29 @@ Enact a temp Basal or a temp target */
 
 "Google Gemini API Key" = "Google Gemini API Key";
 
-"Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day)." = "Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day).";
+"Get a free API key at ai.google.dev." = "Get a free API key at ai.google.dev.";
 
 "Google (Gemini API) Configuration" = "Google (Gemini API) Configuration";
 
-"Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day)." = "Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day).";
+"Get a free API key at ai.google.dev." = "Get a free API key at ai.google.dev.";
 
 "Enter your Claude API key" = "Enter your Claude API key";
 
 "Claude API Key" = "Claude API Key";
 
-"Get a Claude API key from console.anthropic.com. Claude excels at detailed reasoning and food analysis. Pricing starts at $0.25 per million tokens for Haiku model." = "Get a Claude API key from console.anthropic.com. Claude excels at detailed reasoning and food analysis. Pricing starts at $0.25 per million tokens for Haiku model.";
+"Get an API key at console.anthropic.com." = "Get an API key at console.anthropic.com.";
 
 "Anthropic (Claude API) Configuration" = "Anthropic (Claude API) Configuration";
+
+"USDA Food Database" = "USDA Food Database";
+
+"USDA FoodData API Key" = "USDA FoodData API Key";
+
+"Get a free key at fdc.nal.usda.gov/api-key-signup." = "Get a free key at fdc.nal.usda.gov/api-key-signup.";
+
+"Optional — uses DEMO_KEY if empty" = "Optional — uses DEMO_KEY if empty";
+
+"Leave empty to use the default DEMO_KEY, which is rate-limited. A free personal API key allows more requests." = "Leave empty to use the default DEMO_KEY, which is rate-limited. A free personal API key allows more requests.";
 
 "Provider for Barcode Scanning" = "Provider for Barcode Scanning";
 
@@ -1585,8 +1618,6 @@ Enact a temp Basal or a temp target */
 "Fast" = "Hurtig";
 
 "Provider for AI Image Analysis" = "Provider for AI Image Analysis";
-
-"Configure the API service used for each type of food search. AI Image Analysis controls what happens when you take photos of food. Different providers excel at different search methods." = "Configure the API service used for each type of food search. AI Image Analysis controls what happens when you take photos of food. Different providers excel at different search methods.";
 
 "Food Search Provider Configuration" = "Food Search Provider Configuration";
 
@@ -1667,6 +1698,15 @@ Enact a temp Basal or a temp target */
 "carbs" = "carbs";
 
 "fat" = "fat";
+
+/* Display more macro nutrients */
+"More" = "More";
+
+/* Additional nutrient */
+"more nutrient" = "more nutrient";
+
+/* Additional nutrients */
+"more nutrients" = "more nutrients";
 
 "📝 Notes" = "📝 Notes";
 
@@ -1751,30 +1791,12 @@ Enact a temp Basal or a temp target */
 
 "• **USDA FoodData Central**: Free, official nutrition database. Superior nutrition data for non-packaged foods like fruits, vegetables, and meat." = "• **USDA FoodData Central**: Free, official nutrition database. Superior nutrition data for non-packaged foods like fruits, vegetables, and meat.";
 
-"• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods. Default for text and barcode searches." = "• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods. Default for text and barcode searches.";
-
-"• **OpenAI (ChatGPT API)**: Most accurate AI analysis using GPT-4 Vision. Requires API key (~$0.01 per image). Excellent at image analysis and natural language queries." = "• **OpenAI (ChatGPT API)**: Most accurate AI analysis using GPT-4 Vision. Requires API key (~$0.01 per image). Excellent at image analysis and natural language queries.";
-
-"• **Google (Gemini API)**: Free AI with generous limits (1500/day). Excellent food recognition using Google's Vision AI. Perfect balance of quality and cost." = "• **Google (Gemini API)**: Free AI with generous limits (1500/day). Excellent food recognition using Google's Vision AI. Perfect balance of quality and cost.";
-
-"• **Anthropic (Claude API)**: Advanced AI with detailed reasoning. Excellent at food analysis and portion estimation. Requires API key (~$0.25 per million tokens)." = "• **Anthropic (Claude API)**: Advanced AI with detailed reasoning. Excellent at food analysis and portion estimation. Requires API key (~$0.25 per million tokens).";
-
-"Available Search Providers:" = "Available Search Providers:";
-
-"Provider Information" = "Provider Information";
-
+"• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods." = "• **OpenFoodFacts**: Free, open database with extensive barcode coverage and text search for packaged foods.";
 "❌ If you select 'OpenFoodFacts' or 'USDA', camera analysis will use basic estimation instead of AI" = "❌ If you select 'OpenFoodFacts' or 'USDA', camera analysis will use basic estimation instead of AI";
 
 "✅ Select 'Anthropic (Claude API)', 'Google (Gemini API)', or 'OpenAI (ChatGPT API)' for AI Image Analysis to use your paid keys" = "✅ Select 'Anthropic (Claude API)', 'Google (Gemini API)', or 'OpenAI (ChatGPT API)' for AI Image Analysis to use your paid keys";
 
 "When you take a photo of food, the app uses the provider selected in 'AI Image Analysis' above." = "When you take a photo of food, the app uses the provider selected in 'AI Image Analysis' above.";
-
-"Camera Food Analysis" = "Camera Food Analysis";
-
-"To use your paid API keys, make sure to select the corresponding provider in 'AI Image Analysis' above. The provider you select for AI Image Analysis is what will be used when you take photos of food." = "To use your paid API keys, make sure to select the corresponding provider in 'AI Image Analysis' above. The provider you select for AI Image Analysis is what will be used when you take photos of food.";
-
-"Important: How to Use Your API Keys" = "Important: How to Use Your API Keys";
-
 "Break down this meal into individual components with complete macronutrient profiles (carbs, protein, fat, calories) per item and combined totals." = "Break down this meal into individual components with complete macronutrient profiles (carbs, protein, fat, calories) per item and combined totals.";
 
 "Identify all food items in this image with focus on carbohydrate content for diabetes management. Provide detailed carb counts for each component and total meal carbohydrates." = "Identify all food items in this image with focus on carbohydrate content for diabetes management. Provide detailed carb counts for each component and total meal carbohydrates.";
@@ -1791,7 +1813,7 @@ Enact a temp Basal or a temp target */
 
 "ChatGPT (OpenAI) API Key" = "ChatGPT (OpenAI) API Key";
 
-"Get an API key from platform.openai.com. Customize the analysis prompt to get specific meal component breakdowns and nutrition totals. (~$0.01 per image)" = "Get an API key from platform.openai.com. Customize the analysis prompt to get specific meal component breakdowns and nutrition totals. (~$0.01 per image)";
+"Get an API key at platform.openai.com." = "Get an API key at platform.openai.com.";
 
 "OpenAI (ChatGPT API) Configuration" = "OpenAI (ChatGPT API) Configuration";
 
@@ -1805,7 +1827,7 @@ Enact a temp Basal or a temp target */
 
 "Google Gemini API Key" = "Google Gemini API Key";
 
-"Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day)." = "Get a free API key from ai.google.dev. Google Gemini provides excellent food recognition with generous free tier (1500 requests per day).";
+"Get a free API key at ai.google.dev." = "Get a free API key at ai.google.dev.";
 
 "Google (Gemini API) Configuration" = "Google (Gemini API) Configuration";
 
@@ -2001,9 +2023,9 @@ Enact a temp Basal or a temp target */
 
 "Cal" = "Cal";
 
-" servings" = "servings";
+"servings" = "servings";
 
-" serving" = "serving";
+"serving" = "serving";
 
 "Reset to " = "Reset to ";
 
@@ -2011,9 +2033,13 @@ Enact a temp Basal or a temp target */
 
 "Carbs" = "Kulhydrater";
 
-// --------- End of AI ---------
-/* */
+"Discard" = "Discard";
 
+"Do you want to discard this meal?" = "Do you want to discard this meal?";
+
+// --------- End of AI ---------
+
+/* */
 "Temp Basal" = "Midlertidig Basal";
 
 /* */
@@ -2084,8 +2110,8 @@ Enact a temp Basal or a temp target */
 "Bolus already in Progress!" = "Bolus already in Progress!";
 
 /* -------------- Developer settings ---------------------- */
-/* Debug options */
 
+/* Debug options */
 "Developer" = "Udvikler";
 
 /* Debug option view NS Upload Profile */
@@ -2202,8 +2228,8 @@ Enact a temp Basal or a temp target */
 "Total" = "Total";
 
 /* -------------------------------------------- FPU Strings ------------------------------------------------------*/
-/* Enable FPU */
 
+/* Enable FPU */
 "Enable" = "Aktivér";
 
 /* Header */
@@ -2434,8 +2460,8 @@ Enact a temp Basal or a temp target */
 "Hide Future" = "Skjul Fremtid";
 
 /* ----------------------- New Bolus Calculator ---------------------------*/
-/* Warning about bolus recommendation. Title */
 
+/* Warning about bolus recommendation. Title */
 "Warning!" = "Advarsel!";
 
 /* Alert to confirm bolus amount to add */
@@ -2646,10 +2672,10 @@ Enact a temp Basal or a temp target */
 "Failed to Suspend Insulin Delivery" = "Kunne ikke suspendere insulintilførsel";
 
 //* -----------------------------------------------------------------------*/
+
 /* ----------------------Statistics strings -------------------------------*/
+
 /* */
-
-
 "Today" = "I dag";
 
 /* */
@@ -2856,9 +2882,6 @@ Enact a temp Basal or a temp target */
 /* UI/UX-setting */
 "Display Insulin Activity Chart" = "Display Insulin Activity Chart";
 
-/* UI/UX-setting */
-"Don't ask for saving search result as meal preset" = "Don't ask for saving search result as meal preset";
-
 /* --------------------------------------------------------  Dexcom G7 --------------------------------------*/
 
 "CGM Configuration" = "CGM Konfiguration";
@@ -2876,8 +2899,8 @@ Enact a temp Basal or a temp target */
 /* Smoothing of CGM readings */
 "Smooth Glucose Value" = "Glat Glukose Værdi";
 /* ------------------------------------------- Sharing -------------------------------------------------------*/
-/* Setting Title */
 
+/* Setting Title */
 "Sharing" = "Sharing";
 
 /* Share and Backup page header */
@@ -2908,7 +2931,7 @@ Enact a temp Basal or a temp target */
 "Birth Date" = "Birth Date";
 
 /* Share and Backup info text */
-"\nIf you enable \"Share and Backup\" daily backups of your settings and statistics will be made to online database.\n\nMake sure to copy and save your recovery token below. The recovery token is required to import your settings to another phone when using the onboarding view." = "\nIf you enable \"Share and Backup\" daily backups of your settings and statistics will be made to online database.\n\nMake sure to copy and save your recovery token below. The recovery token is required to import your settings to another phone when using the onboarding view.";
+"\nIf you enable \"Share and Backup\" daily backups of your settings and statistics will be made to online database." = "\nIf you enable \"Share and Backup\" daily backups of your settings and statistics will be made to online database.";
 
 /* Section title if sharing off */
 "Share Bare Minimum" = "Share Bare Minimum";
@@ -2917,7 +2940,7 @@ Enact a temp Basal or a temp target */
 "Just iAPS version number" = "Just iAPS version number";
 
 /* Share info text */
-"Every bit of information you choose to share is uploaded anonymously. To prevent duplicate uploads, the data is identified with a unique random string saved on your phone, the recovery token." = "Every bit of information you choose to share is uploaded anonymously. To prevent duplicate uploads, the data is identified with a unique random string saved on your phone, the recovery token.";
+"Every bit of information you choose to share is uploaded anonymously. To prevent duplicate uploads, the data is identified with a unique random string saved on your phone - the recovery token." = "Every bit of information you choose to share is uploaded anonymously. To prevent duplicate uploads, the data is identified with a unique random string saved on your phone - the recovery token.";
 
 /* Token section title */
 "Your recovery token" = "Your recovery token";
@@ -2937,9 +2960,15 @@ Enact a temp Basal or a temp target */
 /* */
 "Share your data anonymously" = "Share your data anonymously";
 
-/* ——————————Contact Image ————————*/
-/* Contact Image, contacts list - prefix before the contact given name */
+/* */
+"Upload Daily Log" = "Upload Daily Log";
 
+/* */
+"When enabled, the previous day's log file is automatically uploaded after midnight. Logs are used only to provide the multi-day analysis feature on open-iaps.app. Off by default." = "When enabled, the previous day's log file is automatically uploaded after midnight. Logs are used only to provide the multi-day analysis feature on open-iaps.app. Off by default.";
+
+/* ——————————Contact Image ————————*/
+
+/* Contact Image, contacts list - prefix before the contact given name */
 "Contact" = "Contact";
 
 /* Contact Image, settings, header of the contacts list */
@@ -3090,14 +3119,29 @@ Enact a temp Basal or a temp target */
 "LoopStatusContactValue" = "Loop status";
 
 /* --------------------------  Dana Pump  ---------------------- */
-/* Dana footer */
 
+/* Dana footer */
 "Dana pump does not allow editing of max basal and max bolus. Configure these in the doctor's settings of the pump. Saving the settings will fetch the lastest values from the pump" = "Dana pump does not allow editing of max basal and max bolus. Configure these in the doctor's settings of the pump. Saving the settings will fetch the lastest values from the pump";
 
 /* --------- Auto ISF --------- */
-/* */
 
+/* */
 "Dynamic ISF is disabled while Auto ISF is enabled" = "Dynamic ISF is disabled while Auto ISF is enabled";
+
+/* */
+"Nighttime" = "Nighttime";
+
+/* */
+"Disable during nighttime" = "Disable during nighttime";
+
+/* */
+"Disables Auto ISF during nighttime, or any other period selected." = "Disables Auto ISF during nighttime, or any other period selected.";
+
+/* */
+"To" = "To";
+
+/* */
+"From" = "From";
 
 /* */
 "Default value: 1.2 The upper limit of ISF adjustment" = "Default value: 1.2 The upper limit of ISF adjustment";
@@ -3293,6 +3337,12 @@ Enact a temp Basal or a temp target */
 "Enable Auto ISF" = "Enable Auto ISF";
 
 /* */
+"Enable Auto CR" = "Enable Auto CR";
+
+/* */
+"Highly Experimental!\n\nAdjusts your profile Carb Ratio each loop by the same amount as your profile ISF using autoISF settings.\n\nUse the bolus calculator with great care, this may cause dose recommendations to be too strong.\n\nAutoCR + autoISF can stack. Reduce autoISF aggressiveness first (e.g., lower max/weights), then enable AutoCR and monitor closely." = "Highly Experimental!\n\nAdjusts your profile Carb Ratio each loop by the same amount as your profile ISF using autoISF settings.\n\nUse the bolus calculator with great care, this may cause dose recommendations to be too strong.\n\nAutoCR + autoISF can stack. Reduce autoISF aggressiveness first (e.g., lower max/weights), then enable AutoCR and monitor closely.";
+
+/* */
 "Enables Auto ISF. This will disable any eventual dynamic ISF/CR setting" = "Enables Auto ISF. This will disable any eventual dynamic ISF/CR setting";
 
 /* */
@@ -3329,8 +3379,8 @@ Enact a temp Basal or a temp target */
   Infotexts from openaps.docs and androidaps.docs
   iAPS
 */
-/* Headline Rewind Resets Autosens */
 
+/* Headline Rewind Resets Autosens */
 "Rewind Resets Autosens" = "Spol tilbage Nulstiller Autosens";
 
 /* ”Rewind Resets Autosens” */
@@ -3562,8 +3612,8 @@ Enact a temp Basal or a temp target */
 "Default value: 0.5 This is another key OpenAPS safety cap, and specifies what share of the total insulin required can be delivered as SMB. Increase this experimental value slowly and with caution." = "Standardværdi: 0,5 Dette er en anden nøgle OpenAPS sikkerhed grænse og specificere, hvilken andel af den samlede krævet insulin, der kan leveres som SMB. Forøg denne eksperimentelle værdi langsomt og med forsigtighed.";
 
 // Dynamic ISF + CR Settings:
-/* Headline "Adjust Dynamic ISF constant" */
 
+/* Headline "Adjust Dynamic ISF constant" */
 "Adjust Dynamic ISF constant" = "Juster Dynamisk ISF konstant";
 
 /* Adjust Dynamic ISF constant */
@@ -3614,14 +3664,8 @@ Enact a temp Basal or a temp target */
 /* Dynamic ISF Setting Title */
 "Minimum Threshold Setting" = "Minimum Grænseværdi Indstilling";
 
-/* Minimum Threshold Setting, Part 1 */
-"This setting lets you choose a level below which no insulin will be given.\n\nThe threshold is using the largest amount of your threshold setting and the computed threshold:\n\nTarget Glucose - (Target Glucose - 40) / 2\n, here using mg/dl as glucose unit.\n\nFor example, if your Target Glucose is " = "Denne indstilling giver dig mulighed for at vælge et niveau, under hvilket der ikke vil blive givet insulin.\n\nGrænsen angiver den største mængde af din grænseværdi indstilling og den beregnede grænseværdi:\n\nTarget Glukose - (Target Glukose - 40) / 2\n, her anvendes mg/dl som glukose enhed.\n\nHvis for eksempel dit Glukose Mål er ";
-
-/* Minimum Threshold Setting, Part 2 */
-"the threshold will be " = "grænseværdien vil være ";
-
-/* Minimum Threshold Setting, Part 3 */
-"unless your threshold setting is set higher:" = "medmindre din grænseværdi indstilling er sat højere:";
+/* Minimum Threshold Setting */
+"This setting lets you choose a glucose target limit below which no SMB insulin or extra temporary basal insulin will ever be given. Extra temporary basal insulin is the insulin exceeding the insulin required for the basal metabolism.\n\nThe actual glucose threshold used in OpenAPS algoritm will always be the bigger amount of this setting and the computed value:\n\nTarget Glucose - (Target Glucose - 40) / 2." = "This setting lets you choose a glucose target limit below which no SMB insulin or extra temporary basal insulin will ever be given. Extra temporary basal insulin is the insulin exceeding the insulin required for the basal metabolism.\n\nThe actual glucose threshold used in OpenAPS algoritm will always be the bigger amount of this setting and the computed value:\n\nTarget Glucose - (Target Glucose - 40) / 2.";
 
 /* Threshold Table Columns Title */
 "Setting" = "Indstillinger";
@@ -3785,7 +3829,7 @@ Enact a temp Basal or a temp target */
 "Light / Dark Mode" = "Light / Dark Mode";
 
 /* Debug option */
-"Neglect Carbohydrates in oref0" = "Neglect Carbohydrates in oref0";
+"Neglect Carbs in oref0" = "Neglect Carbs in oref0";
 
 /* Debug option */
 "Hide Predictions" = "Hide Predictions";
@@ -3963,3 +4007,39 @@ Enact a temp Basal or a temp target */
 
 /* main chart settings - toggle, controls whether to show y-axis labels (glucose) */
 "Y-axis labels" = "Y-axis labels";
+
+"Fiber" = "Fiber";
+
+"Sugars" = "Sugars";
+
+"Search Results" = "Search Results";
+
+"Results for" = "Results for";
+
+/* name of complete meals when saving */
+"Complete Meal" = "Complete Meal";
+
+/* Alert title when manual temp basal rate exceeds Max Basal setting */
+"Max Basal Exceeded" = "Max Basal Exceeded";
+
+/* Alert message when manual temp basal rate exceeds Max Basal setting. Args: entered rate, configured max basal */
+"The rate %.2f U/hr exceeds your Max Basal setting of %.2f U/hr." = "The rate %.2f U/hr exceeds your Max Basal setting of %.2f U/hr.";
+
+/* --- Build expiration alert (TestFlight 90-day lifetime) --- */
+"OK" = "OK";
+
+"More Info" = "Mere Info";
+
+"Build Expires Soon!" = "Build Expires Soon!";
+
+"Build Expiring in %d Day" = "Build Expiring in %d Day";
+
+"Build Expiring in %d Days" = "Build Expiring in %d Days";
+
+"Your iAPS build expires in %d hour. After expiration the app will not launch until you rebuild." = "Your iAPS build expires in %d hour. After expiration the app will not launch until you rebuild.";
+
+"Your iAPS build expires in %d hours. After expiration the app will not launch until you rebuild." = "Your iAPS build expires in %d hours. After expiration the app will not launch until you rebuild.";
+
+"Your iAPS build expires on %1$@ (%2$d day remaining). TestFlight builds must be renewed every 90 days." = "Your iAPS build expires on %1$@ (%2$d day remaining). TestFlight builds must be renewed every 90 days.";
+
+"Your iAPS build expires on %1$@ (%2$d days remaining). TestFlight builds must be renewed every 90 days." = "Your iAPS build expires on %1$@ (%2$d days remaining). TestFlight builds must be renewed every 90 days.";

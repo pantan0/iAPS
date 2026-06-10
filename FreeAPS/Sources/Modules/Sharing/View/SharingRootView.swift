@@ -9,6 +9,30 @@ public enum Sex: String, CaseIterable, Identifiable {
     public var id: Self { self }
 }
 
+extension Sex {
+    static func savedSettings(_ sexSetting: Int) -> Sex {
+        switch sexSetting {
+        case 0:
+            return .woman
+        case 1:
+            return .man
+        case 2:
+            return .other
+        default:
+            return .secret
+        }
+    }
+
+    func saveSetting() -> Int {
+        switch self {
+        case .woman: return 0
+        case .man: return 1
+        case .other: return 2
+        case .secret: return 3
+        }
+    }
+}
+
 extension Sharing {
     struct RootView: BaseView {
         let resolver: Resolver
@@ -44,7 +68,7 @@ extension Sharing {
                                 Text(NSLocalizedString(sex.rawValue, comment: "")).tag(Optional(sex.rawValue))
                             }
                         }.onChange(of: state.sex) {
-                            state.saveSetting()
+                            state.sexSetting = state.sex.saveSetting()
                         }
                         HStack {
                             DatePicker("Birth Date", selection: $state.birthDate, in: dateRange, displayedComponents: [.date])
@@ -54,14 +78,23 @@ extension Sharing {
                 } header: { Text("Upload Settings and Statistics") }
                 footer: {
                     Text(
-                        "\nIf you enable \"Share and Backup\" daily backups of your settings and statistics will be made to online database.\n\nMake sure to copy and save your recovery token below. The recovery token is required to import your settings to another phone when using the onboarding view."
+                        "\nIf you enable \"Share and Backup\" daily backups of your settings and statistics will be made to online database."
                     )
                 }
 
                 Section {}
                 footer: {
                     Text(
-                        "Every bit of information you choose to share is uploaded anonymously. To prevent duplicate uploads, the data is identified with a unique random string saved on your phone, the recovery token."
+                        "Every bit of information you choose to share is uploaded anonymously. To prevent duplicate uploads, the data is identified with a unique random string saved on your phone - the recovery token."
+                    )
+                }
+
+                Section {
+                    Toggle("Upload Daily Log", isOn: $state.uploadLogs)
+                } header: { Text("Upload Daily Log") }
+                footer: {
+                    Text(
+                        "When enabled, the previous day's log file is automatically uploaded after midnight. Logs are used only to provide the multi-day analysis feature on open-iaps.app. Off by default."
                     )
                 }
 
@@ -101,7 +134,7 @@ extension Sharing {
             }
             .dynamicTypeSize(...DynamicTypeSize.xxLarge)
             .onAppear {
-                state.savedSettings()
+                state.sex = Sex.savedSettings(state.sexSetting)
             }
             .navigationBarTitle("Share and Backup")
         }
